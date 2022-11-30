@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Services;
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/account")]
     [ApiController]
     public class UserController : ControllerBase
     {
@@ -17,7 +18,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Authenticate(LoginCredentials model)
+        public IActionResult Authenticate([FromBody] LoginCredentials model)
         {
             var response = _userService.Authenticate(model);
 
@@ -30,23 +31,23 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(UserRegisterModel model)
+        public async Task<IActionResult> Register([FromBody] UserRegisterModel model)
         {
             var response = await _userService.Register(model);
 
             if (response == null)
             {
-                return BadRequest(new { message = "Failed register" });
+                return BadRequest(new { DuplicateUserName = $"Username {model.Email} is already taken." });
             }
 
             return Ok(response);
         }
 
         [Authorize]
-        [HttpGet]
-        public IActionResult GetAll()
+        [HttpGet("profile")]
+        public IActionResult GetUserInfo()
         {
-            var user  = _userService.GetAll();
+            var user = _userService.GetById(((User)HttpContext.Items["User"]).Id);
             return Ok(user);
         }
     }

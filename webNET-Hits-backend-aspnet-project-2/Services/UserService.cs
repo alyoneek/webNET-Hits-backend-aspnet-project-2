@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml.Linq;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
@@ -17,12 +15,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     public class UserService : IUserService
     {
         private readonly IEfRepository<User> _userRepository;
-        private readonly IConfiguration _configuration;
+        private readonly IJwtUtils _jwtUtils;
         private readonly IMapper _mapper;
-        public UserService(IEfRepository<User> userRepository, IConfiguration configuration, IMapper mapper)
+        public UserService(IEfRepository<User> userRepository, IJwtUtils jwtUtils, IMapper mapper)
         {
             _userRepository = userRepository;
-            _configuration = configuration;
+            _jwtUtils = jwtUtils;
             _mapper = mapper;
         }
 
@@ -30,7 +28,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             var user = _userRepository
                 .GetAll()
-                .FirstOrDefault(x => x.Email == model.Email && x.Password == model.Password);
+                .SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
 
             if (user == null) 
             {
@@ -38,14 +36,24 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 return null;
             }
 
-            var token = _configuration.GenerateJwtToken(user);
+            var token = _jwtUtils.GenerateToken(user);
 
-            return new TokenResponse(user, token);
+            return new TokenResponse(token);
         }
 
         public async Task<TokenResponse> Register(UserRegisterModel model)
         {
             var user = _mapper.Map<User>(model);
+
+            var existedUser = _userRepository
+                .GetAll()
+                .SingleOrDefault(x => x.Email == user.Email);
+
+            if (existedUser != null)
+            {
+                // todo: logger
+                return null;
+            }
 
             var addedUser = await _userRepository.Add(user);
 
