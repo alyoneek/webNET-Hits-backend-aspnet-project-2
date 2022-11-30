@@ -50,5 +50,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             var user = _userService.GetById(((User)HttpContext.Items["User"]).Id);
             return Ok(user);
         }
+
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> ChangeUserInfo([FromBody] UserEditModel model)
+        {
+            var response = await _userService.Edit(model, ((User)HttpContext.Items["User"]).Id);
+
+            if (response == null)
+            {
+                return BadRequest();
+            }
+
+            return Ok(response);
+        }
     }
 }

@@ -19,6 +19,17 @@ namespace webNET_Hits_backend_aspnet_project_2
                 .ForMember(dst => dst.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
                 .ForMember(dst => dst.Id, opt => opt.Ignore())
                 ;
+
+            CreateMap<(UserEditModel s1, User s2), User>()
+                .ForMember(dst => dst.Email, opt => opt.MapFrom(src => src.s2.Email))
+                .ForMember(dst => dst.FullName, opt => opt.MapFrom(src => src.s1.FullName))
+                .ForMember(dst => dst.Password, opt => opt.MapFrom(src => src.s2.Password))
+                .ForMember(dst => dst.Address, opt => opt.MapFrom(src => src.s1.Address != null ? src.s1.Address : src.s2.Address))
+                .ForMember(dst => dst.BirthDate, opt => opt.MapFrom(src => src.s1.BirthDate != null ? src.s1.BirthDate : src.s2.BirthDate))
+                .ForMember(dst => dst.Gender, opt => opt.MapFrom(src => src.s1.Gender))
+                .ForMember(dst => dst.PhoneNumber, opt => opt.MapFrom(src => src.s1.PhoneNumber != null ? src.s1.PhoneNumber : src.s2.PhoneNumber))
+                .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.s2.Id))
+                ;
         }
     }
 }

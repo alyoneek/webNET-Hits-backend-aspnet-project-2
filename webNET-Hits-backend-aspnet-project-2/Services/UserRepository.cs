@@ -1,4 +1,6 @@
-﻿using webNET_Hits_backend_aspnet_project_2.Models.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using NuGet.Configuration;
+using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -34,6 +36,15 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             var result = await _context.Set<T>().AddAsync(entity);
             await _context.SaveChangesAsync();
             return result.Entity.Id;
+        }
+
+        public async Task<T> Edit(T newEntity)
+        {
+            var existingEntity = GetById(newEntity.Id);
+            _context.Set<T>().Remove(existingEntity);
+            await _context.Set<T>().AddAsync(newEntity);
+            await _context.SaveChangesAsync();
+            return newEntity;
         }
     }
 }

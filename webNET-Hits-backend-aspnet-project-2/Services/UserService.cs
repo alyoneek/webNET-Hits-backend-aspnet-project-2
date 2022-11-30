@@ -9,7 +9,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     {
         TokenResponse Authenticate(LoginCredentials model);
         Task<TokenResponse> Register(UserRegisterModel userModel);
-        IEnumerable<User> GetAll();
+        Task<User> Edit(UserEditModel userModel, Guid id);
         User GetById(Guid id);
     }
     public class UserService : IUserService
@@ -45,11 +45,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             var user = _mapper.Map<User>(model);
 
-            var existedUser = _userRepository
+            var existingUser = _userRepository
                 .GetAll()
                 .SingleOrDefault(x => x.Email == user.Email);
 
-            if (existedUser != null)
+            if (existingUser != null)
             {
                 // todo: logger
                 return null;
@@ -66,9 +66,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return response;
         }
 
-        public IEnumerable<User> GetAll()
+        public async Task<User> Edit(UserEditModel model, Guid id)
         {
-            return _userRepository.GetAll();
+            var existingUser = _userRepository.GetById(id);
+
+            if (existingUser == null) 
+            {
+                return null;
+            }
+
+            var newUser = _mapper.Map<User>((model, existingUser));
+
+            var result = await _userRepository.Edit(newUser);
+
+
+            return result;
         }
 
         public User GetById(Guid id) 

@@ -1,4 +1,5 @@
-﻿using webNET_Hits_backend_aspnet_project_2.Models.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -7,5 +8,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         List<T> GetAll();
         T GetById(Guid Id);
         Task<Guid> Add(T entity);
+        Task<T> Edit(T newEntity);
     }
 }
