@@ -10,7 +10,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         TokenResponse Authenticate(LoginCredentials model);
         Task<TokenResponse> Register(UserRegisterModel userModel);
         Task<User> Edit(UserEditModel userModel, Guid id);
-        User GetById(Guid id);
+        UserDto GetById(Guid id);
     }
     public class UserService : IUserService
     {
@@ -83,9 +83,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return response;
         }
 
-        public User GetById(Guid id) 
+        public UserDto GetById(Guid id) 
         {
-            return _userRepository.GetById(id);
+            var user = _userRepository.GetById(id);
+            var userDto = _mapper.Map<UserDto>(user);
+            return userDto;
         }
     }
 }

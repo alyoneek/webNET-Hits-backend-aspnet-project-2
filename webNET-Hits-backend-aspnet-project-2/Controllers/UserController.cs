@@ -47,7 +47,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet("profile")]
         public IActionResult GetUserInfo()
         {
-            var user = _userService.GetById(((User)HttpContext.Items["User"]).Id);
+            var user = _userService.GetById((Guid)HttpContext.Items["UserId"]);
             return Ok(user);
         }
 
@@ -55,7 +55,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> ChangeUserInfo([FromBody] UserEditModel model)
         {
-            var response = await _userService.Edit(model, ((User)HttpContext.Items["User"]).Id);
+            var response = await _userService.Edit(model, (Guid)HttpContext.Items["UserId"]);
 
             if (response == null)
             {

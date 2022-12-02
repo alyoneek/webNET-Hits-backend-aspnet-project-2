@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
-using webNET_Hits_backend_aspnet_project_2.Models.Entities;
+using webNET_Hits_backend_aspnet_project_2.Models;
 
 namespace webNET_Hits_backend_aspnet_project_2.Helpers
 {
@@ -9,8 +9,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var user = (User)context.HttpContext.Items["User"];
-            if (user == null)
+            var userId = (Guid)context.HttpContext.Items["UserId"];
+            if (userId == null)
             {
                 // not logged in
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };

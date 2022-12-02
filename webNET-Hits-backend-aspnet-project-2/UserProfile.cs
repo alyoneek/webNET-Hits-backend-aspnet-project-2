@@ -34,6 +34,8 @@ namespace webNET_Hits_backend_aspnet_project_2
 
             CreateMap<UserEditModel, User>()
                 .ForAllMembers(options => options.Condition((_, _, srcMember) => srcMember != null));
+
+            CreateMap<User, UserDto>();
         }
     }
 }

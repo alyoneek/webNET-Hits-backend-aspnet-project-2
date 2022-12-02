@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using webNET_Hits_backend_aspnet_project_2;
@@ -11,9 +12,11 @@ using webNET_Hits_backend_aspnet_project_2;
 namespace webNETHitsbackendaspnetproject2.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221202110349_DishAndCategoryEntity")]
+    partial class DishAndCategoryEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,7 +34,7 @@ namespace webNETHitsbackendaspnetproject2.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
-                    b.Property<int>("DishCategoryId")
+                    b.Property<int>("DishCAtegoryId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Image")
@@ -51,8 +54,6 @@ namespace webNETHitsbackendaspnetproject2.Migrations
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DishCategoryId");
 
                     b.ToTable("Dishes");
                 });
@@ -108,17 +109,6 @@ namespace webNETHitsbackendaspnetproject2.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("webNET_Hits_backend_aspnet_project_2.Models.Entities.Dish", b =>
-                {
-                    b.HasOne("webNET_Hits_backend_aspnet_project_2.Models.Entities.DishCategory", "DishCategory")
-                        .WithMany()
-                        .HasForeignKey("DishCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DishCategory");
                 });
 #pragma warning restore 612, 618
         }

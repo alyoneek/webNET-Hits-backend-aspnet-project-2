@@ -14,7 +14,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
             _logger = logger;
         }
 
-        public async Task Invoke(HttpContext context, IUserService userService, IJwtUtils jwtUtils)
+        public async Task Invoke(HttpContext context, IJwtUtils jwtUtils)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
@@ -22,7 +22,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
             if (userId != null)
             {
                 _logger.LogInformation(userId.Value.ToString());
-                context.Items["User"] = userService.GetById(userId.Value);
+                context.Items["UserId"] = userId.Value;
             }
 
             await _next(context);
