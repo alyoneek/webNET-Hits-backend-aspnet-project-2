@@ -7,7 +7,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     {
         List<T> GetAll();
         T GetById(Guid Id);
-        Task<Guid> Add(T entity);
+        Task<T> Add(T entity);
         Task<T> Edit(T newEntity);
     }
 }

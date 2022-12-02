@@ -59,8 +59,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             var response = Authenticate(new LoginCredentials
             {
-               Email = user.Email,
-               Password = user.Password,  
+                Email = user.Email,
+                Password = user.Password,
             });
 
             return response;
@@ -75,12 +75,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 return null;
             }
 
-            var newUser = _mapper.Map<User>((model, existingUser));
+            var newUser = _mapper.Map(model, existingUser);
 
-            var result = await _userRepository.Edit(newUser);
+            var response = await _userRepository.Edit(newUser);
 
 
-            return result;
+            return response;
         }
 
         public User GetById(Guid id) 

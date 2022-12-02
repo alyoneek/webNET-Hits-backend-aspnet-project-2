@@ -31,20 +31,18 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return result;
         }
 
-        public async Task<Guid> Add(T entity)
+        public async Task<T> Add(T entity)
         {
             var result = await _context.Set<T>().AddAsync(entity);
             await _context.SaveChangesAsync();
-            return result.Entity.Id;
+            return result.Entity;
         }
 
         public async Task<T> Edit(T newEntity)
         {
-            var existingEntity = GetById(newEntity.Id);
-            _context.Set<T>().Remove(existingEntity);
-            await _context.Set<T>().AddAsync(newEntity);
+            var result = _context.Set<T>().Update(newEntity);
             await _context.SaveChangesAsync();
-            return newEntity;
+            return result.Entity;
         }
     }
 }
