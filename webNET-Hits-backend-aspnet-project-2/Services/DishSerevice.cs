@@ -2,6 +2,7 @@
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Models;
+using System.Linq;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -9,6 +10,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     {
         Task<Dish> AddDish(DishDto model);
         DishDto GetDishById(Guid id);
+        DishPagedListDto GetAllDishesByParams(FilterQueryParams queryParams);
     }
     public class DishService : IDishService
     {
@@ -39,6 +41,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             var dishDto = _mapper.Map<DishDto>(dish);
             return dishDto;
+        }
+
+        public DishPagedListDto GetAllDishesByParams(FilterQueryParams queryParams)
+        {
+            var dishes = _dishRepository.GetAll();
+            PageInfoModel pagination = new PageInfoModel(dishes.Count, queryParams.Page);
+            var pagedDishes = dishes.Skip((pagination.Current - 1) * pagination.Size).Take(pagination.Size).ToList();
+            List<DishDto> pagedDishesDto = new List<DishDto>();
+            foreach (Dish dish in pagedDishes)
+            {
+                pagedDishesDto.Add(_mapper.Map<DishDto>(dish));
+            }
+            return new DishPagedListDto(pagedDishesDto, pagination);
         }
     }
 }

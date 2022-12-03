@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using webNET_Hits_backend_aspnet_project_2.Models;
@@ -12,14 +13,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
     public class DishController : ControllerBase
     {
         private readonly IDishService _dishService;
+        private readonly IMapper _mapper;
 
-        public DishController(IDishService dishService)
+        public DishController(IDishService dishService, IMapper mapper)
         {
             _dishService = dishService;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<IActionResult> addDishes(IEnumerable<DishDto> collectionDishes)
+        public async Task<IActionResult> addDishes([FromBody]  IEnumerable<DishDto> collectionDishes)
         {
             List<Dish> addedDishes = new List<Dish>();
              foreach (DishDto dish in collectionDishes)
@@ -31,16 +34,25 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         }
 
         [HttpGet("{id:Guid}")]
-        public IActionResult GetDishInfo(Guid id)
+        public IActionResult GetDishInfo([FromRoute] Guid id)
         {
-            var dish = _dishService.GetDishById(id);
+            var response = _dishService.GetDishById(id);
 
-            if (dish == null)
+            if (response == null)
             {
-                return NotFound(new { Message= $"Dish with id={id} isn't in database" });
+                return NotFound(new { Message = $"Dish with id={id} isn't in database" });
             }
 
-            return Ok(dish);
+            return Ok(response);
+        }
+
+        [HttpGet]
+        public IActionResult GetAllDishes([FromQuery] QueryParams queryParams)
+        {
+            FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
+            //var response = _dishService.GetAllDishesByParams(filterQueryParams);
+            return Ok(filterQueryParams);
+
         }
     }
 }

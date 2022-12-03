@@ -9,6 +9,5 @@
         public Boolean Vegetarian { get; set; }
         public double? Rating { get; set; }
         public int DishCategoryId { get; set; }
-        public DishCategory DishCategory { get; set; }
     }
 }

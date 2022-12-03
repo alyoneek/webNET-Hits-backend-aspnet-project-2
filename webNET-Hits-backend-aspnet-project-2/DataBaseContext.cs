@@ -17,12 +17,17 @@ namespace webNET_Hits_backend_aspnet_project_2
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder
-            .Entity<User>()
+            modelBuilder.Entity<User>()
             .Property(p => p.Gender)
             .HasConversion(
                 v => v.ToString(),
                 v => (GenderType)Enum.Parse(typeof(GenderType), v));
+
+            modelBuilder.Entity<DishCategory>()
+                .HasMany(dc => dc.Dishes)
+                .WithOne()
+                .IsRequired()
+                .HasForeignKey(d => d.DishCategoryId);
         }
     }
 }

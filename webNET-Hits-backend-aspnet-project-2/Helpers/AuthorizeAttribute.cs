@@ -9,7 +9,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            var userId = (Guid)context.HttpContext.Items["UserId"];
+            var userId = context.HttpContext.Items["UserId"];
             if (userId == null)
             {
                 // not logged in

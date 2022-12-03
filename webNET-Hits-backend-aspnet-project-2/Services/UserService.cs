@@ -9,7 +9,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     {
         TokenResponse Authenticate(LoginCredentials model);
         Task<TokenResponse> Register(UserRegisterModel userModel);
-        Task<User> Edit(UserEditModel userModel, Guid id);
+        Task<UserEditModel> Edit(UserEditModel userModel, Guid id);
         UserDto GetById(Guid id);
     }
     public class UserService : IUserService
@@ -66,7 +66,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return response;
         }
 
-        public async Task<User> Edit(UserEditModel model, Guid id)
+        public async Task<UserEditModel> Edit(UserEditModel model, Guid id)
         {
             var existingUser = _userRepository.GetById(id);
 
@@ -80,7 +80,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             var response = await _userRepository.Edit(newUser);
 
 
-            return response;
+            return model;
         }
 
         public UserDto GetById(Guid id) 
