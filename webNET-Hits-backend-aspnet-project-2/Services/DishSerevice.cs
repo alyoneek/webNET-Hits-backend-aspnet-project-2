@@ -45,14 +45,29 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public DishPagedListDto GetAllDishesByParams(FilterQueryParams queryParams)
         {
+            //переделать
             var dishes = _dishRepository.GetAll();
+
+            if (queryParams.Vegetarian)
+            {
+                dishes = dishes.Where(d => d.Vegetarian).ToList(); 
+            }
+
             PageInfoModel pagination = new PageInfoModel(dishes.Count, queryParams.Page);
+
+            if (queryParams.Page > pagination.Count)
+            {
+                return null;
+            }
+
             var pagedDishes = dishes.Skip((pagination.Current - 1) * pagination.Size).Take(pagination.Size).ToList();
+
             List<DishDto> pagedDishesDto = new List<DishDto>();
             foreach (Dish dish in pagedDishes)
             {
                 pagedDishesDto.Add(_mapper.Map<DishDto>(dish));
             }
+
             return new DishPagedListDto(pagedDishesDto, pagination);
         }
     }

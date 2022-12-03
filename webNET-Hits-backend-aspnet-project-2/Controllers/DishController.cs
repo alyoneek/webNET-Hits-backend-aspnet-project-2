@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using NuGet.Packaging.Signing;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Services;
@@ -50,9 +51,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         public IActionResult GetAllDishes([FromQuery] QueryParams queryParams)
         {
             FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
-            //var response = _dishService.GetAllDishesByParams(filterQueryParams);
-            return Ok(filterQueryParams);
-
+            var response = _dishService.GetAllDishesByParams(filterQueryParams);
+            if (response == null)
+            {
+                return BadRequest(new { Message = "Invalid value for attribute page" });
+            }
+            return Ok(response);
         }
     }
 }

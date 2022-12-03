@@ -6,5 +6,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Models
     {
         [Range(1, Int32.MaxValue)]
         public int? Page { get; set; }
+        public  bool? Vegetarian { get; set; }
     }
 }
