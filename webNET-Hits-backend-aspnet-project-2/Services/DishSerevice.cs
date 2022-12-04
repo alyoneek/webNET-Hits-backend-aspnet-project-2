@@ -3,6 +3,7 @@ using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
@@ -15,6 +16,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     public class DishService : IDishService
     {
         private readonly IEfRepository<Dish> _dishRepository;
+        private readonly DataBaseContext _db;
         private readonly IMapper _mapper;
         public DishService(IEfRepository<Dish> dishRepository, IMapper mapper)
         {

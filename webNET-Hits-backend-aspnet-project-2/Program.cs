@@ -17,6 +17,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDishService, DishService>();
+builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.AddScoped(typeof(IEfRepository<>), typeof(UserRepository<>));
 
@@ -33,7 +34,7 @@ builder.Services.AddDbContext<DataBaseContext>(
 );
 
 // AutoMapper
-builder.Services.AddAutoMapper(typeof(UserProfile), typeof(DishProfile));
+builder.Services.AddAutoMapper(typeof(UserProfile), typeof(DishProfile), typeof(BasketProfile));
 
 builder.Services.AddSwaggerGen(option => {
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Delivery.Api", Version = "v1" });

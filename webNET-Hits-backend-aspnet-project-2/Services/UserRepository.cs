@@ -4,7 +4,7 @@ using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
-    public class UserRepository<T> : IEfRepository<T> where T : BaseEntity
+    public class UserRepository<T> : IEfRepository<T> where T : class //BaseEntity
     {
         private readonly DataBaseContext _context;
 
@@ -20,8 +20,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public T GetById(Guid id)
         {
-            var result = _context.Set<T>().FirstOrDefault(x => x.Id == id);
-
+            //var result = _context.Set<T>().FirstOrDefault(x => x.Id == id);
+            var result = _context.Set<T>().Find(id);
             if (result == null)
             {
                 //todo: need to add logger

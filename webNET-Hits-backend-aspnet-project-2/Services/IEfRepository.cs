@@ -3,7 +3,7 @@ using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
-    public interface IEfRepository <T> where T : BaseEntity
+    public interface IEfRepository <T> where T : class //BaseEntity
     {
         List<T> GetAll();
         T GetById(Guid Id);

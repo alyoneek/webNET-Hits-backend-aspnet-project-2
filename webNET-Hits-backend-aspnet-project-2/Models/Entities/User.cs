@@ -17,5 +17,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Models.Entities
         public GenderType Gender { get; set; }
         [Phone]
         public string? PhoneNumber { get; set; }
+
+        public IEnumerable<DishInBasket> DishesInBasket { get; set; }
     }
 }
