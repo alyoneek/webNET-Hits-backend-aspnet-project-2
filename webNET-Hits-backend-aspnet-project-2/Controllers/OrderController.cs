@@ -19,6 +19,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         }
 
         [Authorize]
+        [HttpGet("{id:Guid}")]
+        public IActionResult CreateOrder([FromRoute] Guid id)
+        {
+            //var userId = (Guid)HttpContext.Items["UserId"];
+            var response = _orderService.GetOrderById(id);
+            if (response == null)
+            {
+                return NotFound(new Response("error", $"Order with id={id} doesn't exist"));
+            }
+            return Ok(response);
+        }
+
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto model)
         {

@@ -6,6 +6,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IOrderService
     {
+        OrderDto GetOrderById(Guid orderId);
         Task<Order> CreateOrder(Guid userId, OrderCreateDto model);
     }
     public class OrderService : IOrderService
@@ -23,6 +24,22 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _mapper = mapper;
         }
 
+        public OrderDto GetOrderById(Guid orderId)
+        {
+            // ОБЯЗАТЕЛЬНО ПРОВЕРИТЬ НА ПРАВА
+            var dishes = _dishRepository.GetAll();
+            var dishesInBasket = _basketRepository.GetAll();
+            var order = _ordersRepository.GetById(orderId);
+
+            if (order == null)
+            {
+                return null;
+            }
+
+            var orderDto = _mapper.Map<OrderDto>(order);
+            return orderDto;
+        }
+
         public async Task<Order> CreateOrder(Guid userId, OrderCreateDto model)
         {
             var dishes = _dishRepository.GetAll();
@@ -34,10 +51,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             }
 
             var price = GetTotalOrderPrice(dishesInCart);
-            await EmptyBasket(dishesInCart);
 
             var addedOrder = _mapper.Map<Order>((userId, price, model));
             var response = await _ordersRepository.Add(addedOrder);
+            await EmptyBasket(dishesInCart, response.Id);
+
             return response;
         }
 
@@ -47,9 +65,10 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return totalPrice;
         }
 
-        private async Task EmptyBasket(IEnumerable<DishInBasket> dishesInBasket)
+        private async Task EmptyBasket(List<DishInBasket> dishesInBasket, Guid orderId)
         {
-            await _basketRepository.DeleteRange(dishesInBasket);
+            dishesInBasket.ForEach(d => d.OrderId = orderId);
+            await _basketRepository.EditRange(dishesInBasket);
         }
     }
 }
