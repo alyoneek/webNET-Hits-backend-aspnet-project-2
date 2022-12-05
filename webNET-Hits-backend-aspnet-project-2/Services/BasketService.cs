@@ -9,6 +9,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     {
         IEnumerable<DishBasketDto> GetBasketInfo(Guid userId);
         Task<DishInBasket> AddDishToBasket(Guid userId, Guid dishId);
+        Task<DishInBasket> DeleteDishFromBasket(Guid userId, Guid dishId, bool? increase);
     }
 
 
@@ -71,5 +72,42 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             return addedDish;
         }
+
+        public async Task<DishInBasket> DeleteDishFromBasket(Guid userId, Guid dishId, bool? increase)
+        {
+            var dish = _basketRepository.GetAll()
+                .SingleOrDefault(d => d.CartId == userId && d.DishId == dishId);
+
+            if (dish == null)
+            {
+                return null;
+            }
+
+            DishInBasket removed;
+
+            if (increase == null || increase == false || increase == true && dish.Amount == 1)
+            {
+                removed = await _basketRepository.Delete(dish);
+            } 
+            else
+            {
+                dish.Amount--;
+                removed = await _basketRepository.Edit(dish);
+            }
+
+            return removed; 
+        }
+
+        //public void EmptyCart()
+        //{
+        //    ShoppingCartId = GetCartId();
+        //    var cartItems = _db.ShoppingCartItems.Where(
+        //        c => c.CartId == ShoppingCartId);
+        //    foreach (var cartItem in cartItems)
+        //    {
+        //        _db.ShoppingCartItems.Remove(cartItem);
+        //    }           
+        //    _db.SaveChanges();
+        //}
     }
 }

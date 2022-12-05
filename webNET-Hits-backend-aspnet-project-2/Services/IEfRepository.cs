@@ -9,5 +9,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         T GetById(Guid Id);
         Task<T> Add(T entity);
         Task<T> Edit(T newEntity);
+        Task<T> Delete(T removeEntity);
     }
 }

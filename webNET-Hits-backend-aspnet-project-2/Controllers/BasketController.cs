@@ -51,5 +51,19 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
             return Ok(response);
         }
+
+        [Authorize]
+        [HttpDelete("dish/{dishId:Guid}")]
+        public async Task<IActionResult> DeleteDishFromBasket([FromRoute] Guid dishId, [FromQuery] bool? increase)
+        {
+            var response = await _basketService.DeleteDishFromBasket((Guid)HttpContext.Items["UserId"], dishId, increase);
+
+            if (response == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(response);
+        }
     }
 }
