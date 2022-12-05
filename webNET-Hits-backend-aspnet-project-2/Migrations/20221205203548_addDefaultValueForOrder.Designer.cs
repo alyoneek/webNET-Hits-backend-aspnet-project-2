@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using webNET_Hits_backend_aspnet_project_2;
@@ -11,9 +12,11 @@ using webNET_Hits_backend_aspnet_project_2;
 namespace webNETHitsbackendaspnetproject2.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    partial class DataBaseContextModelSnapshot : ModelSnapshot
+    [Migration("20221205203548_addDefaultValueForOrder")]
+    partial class addDefaultValueForOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -113,7 +116,7 @@ namespace webNETHitsbackendaspnetproject2.Migrations
                     b.Property<DateTime>("OrderTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValue(new DateTime(2022, 12, 5, 20, 49, 26, 524, DateTimeKind.Utc).AddTicks(1993));
+                        .HasDefaultValue(new DateTime(2022, 12, 5, 20, 35, 48, 35, DateTimeKind.Utc).AddTicks(5919));
 
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");

@@ -15,9 +15,6 @@ namespace webNET_Hits_backend_aspnet_project_2
                 .ForMember(dst => dst.Price, opt => opt.MapFrom(src => src.Dish.Price))
                 .ForMember(dst => dst.TotalPrice, opt => opt.MapFrom(src => src.Dish.Price * src.Amount))
                 .ForMember(dst => dst.Image, opt => opt.MapFrom(src => src.Dish.Image));
-
-            //CreateMap<List<DishBasketDto>, List<DishInBasket>>();
-
         }
     }
 }

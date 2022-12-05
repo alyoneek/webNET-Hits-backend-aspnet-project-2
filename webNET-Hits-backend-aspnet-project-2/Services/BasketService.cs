@@ -32,7 +32,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             // нет проверки юзера
             // подтягивание кринге
             var dishes = _dishRepository.GetAll();
-            var dishesInBasket = _basketRepository.GetAll().Where(d => d.CartId == userId).ToList();
+            var dishesInBasket = _basketRepository.GetAll().Where(d => d.CartId == userId && d.OrderId == null).ToList();
 
             var dishesInBasketDto = _mapper.Map<List<DishInBasket>, List<DishBasketDto>>(dishesInBasket);
 
@@ -48,7 +48,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             }
 
             var cartItem = _basketRepository.GetAll()
-                .SingleOrDefault(c => c.CartId == userId && c.DishId == dishId);
+                .SingleOrDefault(c => c.CartId == userId && c.DishId == dishId && c.OrderId == null);
 
             DishInBasket addedDish;
 
@@ -76,7 +76,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         public async Task<DishInBasket> DeleteDishFromBasket(Guid userId, Guid dishId, bool? increase)
         {
             var dish = _basketRepository.GetAll()
-                .SingleOrDefault(d => d.CartId == userId && d.DishId == dishId);
+                .SingleOrDefault(d => d.CartId == userId && d.DishId == dishId && d.OrderId == null);
 
             if (dish == null)
             {

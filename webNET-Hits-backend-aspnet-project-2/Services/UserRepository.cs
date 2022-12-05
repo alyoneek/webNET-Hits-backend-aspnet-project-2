@@ -51,5 +51,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             await _context.SaveChangesAsync();
             return result.Entity;
         }
+
+        public async Task DeleteRange(IEnumerable<T> removeEntitiesRange)
+        {
+            _context.Set<T>().RemoveRange(removeEntitiesRange);
+            await _context.SaveChangesAsync();
+        }
     }
 }

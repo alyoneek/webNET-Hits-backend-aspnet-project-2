@@ -11,6 +11,7 @@ namespace webNET_Hits_backend_aspnet_project_2
         public DbSet<DishCategory> DishCategories { get; set; }
         public DbSet<Dish> Dishes { get; set; }
         public DbSet<DishInBasket> DishesInBasket { get; set; }
+        public DbSet<Order> Orders { get; set; }
         public DataBaseContext(DbContextOptions<DataBaseContext> options) :
             base(options)
         {
@@ -38,6 +39,21 @@ namespace webNET_Hits_backend_aspnet_project_2
 
             modelBuilder.Entity<DishInBasket>()
                 .HasKey(d => new { d.CartId, d.DishId });
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.Status)
+                .HasConversion(
+                    s => s.ToString(),
+                    s => (OrderStatus)Enum.Parse(typeof(OrderStatus), s));
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.Status)
+                .HasDefaultValue(OrderStatus.InProcess);
+
+            modelBuilder.Entity<Order>()
+                .Property(o => o.OrderTime)
+                .HasDefaultValue(DateTime.UtcNow);
+
         }
     }
 }
