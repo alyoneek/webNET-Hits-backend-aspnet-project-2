@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services

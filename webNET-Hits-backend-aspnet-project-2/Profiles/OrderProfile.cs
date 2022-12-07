@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
-using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 
-namespace webNET_Hits_backend_aspnet_project_2
+namespace webNET_Hits_backend_aspnet_project_2.Profiles
 {
     public class OrderProfile : Profile
     {

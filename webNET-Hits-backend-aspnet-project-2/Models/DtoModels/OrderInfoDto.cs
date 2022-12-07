@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using webNET_Hits_backend_aspnet_project_2.Models.Enums;
 
-namespace webNET_Hits_backend_aspnet_project_2.Models
+namespace webNET_Hits_backend_aspnet_project_2.Models.DtoModels
 {
     public class OrderInfoDto
     {
@@ -13,6 +13,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Models
         [Required]
         public OrderStatus Status { get; set; }
         [Required]
-        public Decimal Price { get; set; }
+        public decimal Price { get; set; }
     }
 }

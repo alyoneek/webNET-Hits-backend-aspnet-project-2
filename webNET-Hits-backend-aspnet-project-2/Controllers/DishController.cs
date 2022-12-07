@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using NuGet.Packaging.Signing;
 using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Services;
 

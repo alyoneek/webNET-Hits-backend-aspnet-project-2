@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Models.Enums;
 
