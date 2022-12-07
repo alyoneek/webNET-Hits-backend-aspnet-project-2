@@ -5,14 +5,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
 {
     public class JwtConfigurations
     {
-        public const string Issuer = "JwtIssuer";
-        public const string Audience = "JwtClient";
-        private const string Key = "secretkeyclient0";
-        public const int Lifetime = 60;
-        
-        public static SymmetricSecurityKey GetSymmetricSecurityKey()
+        public string Issuer {get; set; }
+        public string Audience {get; set; }
+        public string Secret { get; set; }
+        public int Lifetime { get; set; }
+
+        public SymmetricSecurityKey GetSymmetricSecurityKey()
         {
-            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Key));
+            return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Secret));
         }
 
     }

@@ -22,6 +22,9 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.AddScoped(typeof(IEfRepository<>), typeof(UserRepository<>));
 
+builder.Services.Configure<JwtConfigurations>(
+    builder.Configuration.GetSection("Auth"));
+
 // enum converter
 builder.Services.AddControllers().AddJsonOptions(x =>
 {

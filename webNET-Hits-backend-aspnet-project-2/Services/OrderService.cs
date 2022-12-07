@@ -1,13 +1,17 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
+using webNET_Hits_backend_aspnet_project_2.Models.Enums;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IOrderService
     {
         OrderDto GetOrderById(Guid orderId);
+        IEnumerable<OrderInfoDto> GetOrders(Guid userId);
         Task<Order> CreateOrder(Guid userId, OrderCreateDto model);
+        Task<Order> ConfirmOrder(Guid orderId);
     }
     public class OrderService : IOrderService
     {
@@ -40,6 +44,16 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return orderDto;
         }
 
+        public IEnumerable<OrderInfoDto> GetOrders(Guid userId)
+        {
+            // ОБЯЗАТЕЛЬНО ПРОВЕРИТЬ НА ПРАВА
+            var orders = _ordersRepository.GetAll()
+                .Where(o => o.UserId == userId).ToList();
+
+            var ordersDto = _mapper.Map<List<Order>, List<OrderInfoDto>>(orders);
+            return ordersDto;
+        }
+
         public async Task<Order> CreateOrder(Guid userId, OrderCreateDto model)
         {
             var dishes = _dishRepository.GetAll();
@@ -57,6 +71,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             await EmptyBasket(dishesInCart, response.Id);
 
             return response;
+        }
+
+        public async Task<Order> ConfirmOrder(Guid orderId)
+        {
+            var order = _ordersRepository.GetById(orderId);
+            if (order == null)
+            {
+                return null;
+            }
+
+            order.Status = OrderStatus.Delivered;
+
+            var result = await _ordersRepository.Edit(order);
+
+            return result;
         }
 
         private decimal GetTotalOrderPrice(IEnumerable<DishInBasket> dishesInCart)

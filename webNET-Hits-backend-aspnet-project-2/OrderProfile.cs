@@ -15,6 +15,7 @@ namespace webNET_Hits_backend_aspnet_project_2
                 .ForMember(dst => dst.Address, opt => opt.MapFrom(src => src.Item3.Address));
 
             CreateMap<Order, OrderDto>();
+            CreateMap<Order, OrderInfoDto>();
         }
     }
 }
