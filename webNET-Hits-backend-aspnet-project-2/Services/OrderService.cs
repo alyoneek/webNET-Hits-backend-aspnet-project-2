@@ -75,6 +75,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public async Task<Order> ConfirmOrder(Guid orderId)
         {
+            // ДВАЖДЫ ПОДТВЕРДИТЬ = БЕД РЕКВЕСТ
             var order = _ordersRepository.GetById(orderId);
             if (order == null)
             {

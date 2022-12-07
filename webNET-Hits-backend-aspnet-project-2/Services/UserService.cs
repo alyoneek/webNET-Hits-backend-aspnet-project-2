@@ -28,9 +28,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             var user = _userRepository
                 .GetAll()
-                .SingleOrDefault(x => x.Email == model.Email && x.Password == model.Password);
+                .SingleOrDefault(x => x.Email == model.Email);
 
-            if (user == null) 
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(model.Password, user.Password);
+
+            if (!isValidPassword) 
             {
                 // todo: logger
                 return null;
@@ -59,8 +61,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             var response = Authenticate(new LoginCredentials
             {
-                Email = user.Email,
-                Password = user.Password,
+                Email = model.Email,
+                Password = model.Password,
             });
 
             return response;
