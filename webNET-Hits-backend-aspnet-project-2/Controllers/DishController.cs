@@ -1,8 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
-using NuGet.Packaging.Signing;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
@@ -23,41 +20,45 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _mapper = mapper;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> addDishes([FromBody]  IEnumerable<DishDto> collectionDishes)
-        {
-            List<Dish> addedDishes = new List<Dish>();
-             foreach (DishDto dish in collectionDishes)
-            {
-                var response = await _dishService.AddDish(dish);
-                addedDishes.Add(response);
-            }
-            return Ok(addedDishes);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> addDishes([FromBody] IEnumerable<DishDto> collectionDishes)
+        //{
+        //    List<Dish> addedDishes = new List<Dish>();
+        //    foreach (DishDto dish in collectionDishes)
+        //    {
+        //        var response = await _dishService.AddDish(dish);
+        //        addedDishes.Add(response);
+        //    }
+        //    return Ok(addedDishes);
+        //}
 
         [HttpGet("{id:Guid}")]
-        public IActionResult GetDishInfo([FromRoute] Guid id)
+        public async Task<ActionResult<DishDto>> Get([FromRoute] Guid id)
         {
-            var response = _dishService.GetDishById(id);
-
-            if (response == null)
+            try
             {
-                return NotFound(new { Message = $"Dish with id={id} isn't in database" });
+                var response = await _dishService.GetConcreteDish(id);
+                return Ok(response);
             }
-
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [HttpGet]
-        public IActionResult GetAllDishes([FromQuery] QueryParams queryParams)
+        public async Task<ActionResult<DishPagedListDto>> Get([FromQuery] QueryParams queryParams)
         {
-            FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
-            var response = _dishService.GetAllDishesByParams(filterQueryParams);
-            if (response == null)
+            try
             {
-                return BadRequest(new { Message = "Invalid value for attribute page" });
+                FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
+                var response = await _dishService.GetListDishes(filterQueryParams);
+                return Ok(response);
             }
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
     }
 }

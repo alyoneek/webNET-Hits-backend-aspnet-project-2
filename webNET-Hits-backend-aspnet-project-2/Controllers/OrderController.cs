@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
+﻿using Microsoft.AspNetCore.Mvc;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
@@ -21,54 +19,64 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
         [Authorize]
         [HttpGet("{id:Guid}")]
-        public IActionResult GetOrderById([FromRoute] Guid id)
+        public async Task<ActionResult<OrderDto>> Get([FromRoute] Guid id)
         {
-            //var userId = (Guid)HttpContext.Items["UserId"];
-            var response = _orderService.GetOrderById(id);
-            if (response == null)
+            try
             {
-                return NotFound(new Response("error", $"Order with id={id} doesn't exist"));
+                var response = await _orderService.GetConcreteOrder(id);
+                return Ok(response);
             }
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [Authorize]
         [HttpGet]
-        public IActionResult GetOrders()
+        public async Task<ActionResult<IEnumerable<OrderInfoDto>>> Get()
         {
-            var userId = (Guid)HttpContext.Items["UserId"];
-            var response = _orderService.GetOrders(userId);
-            //if (response == null)
-            //{
-            //    return NotFound(new Response("error", $"Order with id={id} doesn't exist"));
-            //}
-            return Ok(response);
+            try
+            {
+                var userId = (Guid)HttpContext.Items["UserId"];
+                var response = await _orderService.GetListOrders(userId);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto model)
+        public async Task<IActionResult> Post([FromBody] OrderCreateDto model)
         {
-            var userId = (Guid)HttpContext.Items["UserId"];
-            var response = await _orderService.CreateOrder(userId, model);
-            if (response == null)
+            try
             {
-                return BadRequest(new Response("error", $"Empty basket for user with id={userId}"));
+                var userId = (Guid)HttpContext.Items["UserId"];
+                await _orderService.CreateOrder(userId, model);
+                return Ok();
             }
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [Authorize]
         [HttpPost("{id:Guid}/status")]
-        public async Task<IActionResult> ConfirmOrder([FromRoute] Guid id)
+        public async Task<IActionResult> Post([FromRoute] Guid id)
         {
-            //var userId = (Guid)HttpContext.Items["UserId"];
-            var response = await _orderService.ConfirmOrder(id);
-            if (response == null)
+            try
             {
-                return NotFound(new Response("error", $"Order with id={id} doesn't exist."));
+                await _orderService.ConfirmOrderDelivery(id);
+                return Ok();
             }
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
     }
 }

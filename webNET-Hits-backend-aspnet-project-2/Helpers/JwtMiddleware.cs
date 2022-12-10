@@ -21,8 +21,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
             var userId = jwtUtils.ValidateToken(token);
             if (userId != null)
             {
-                _logger.LogInformation(userId.Value.ToString());
-                context.Items["UserId"] = userId.Value;
+                //_logger.LogInformation(userId.Value.ToString());
+                context.Items["UserId"] = userId;
             }
 
             await _next(context);

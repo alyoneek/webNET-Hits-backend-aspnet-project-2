@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System.Web.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
@@ -8,59 +10,57 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IUserService
     {
-        TokenResponse Authenticate(LoginCredentials model);
+        Task<TokenResponse> Login(LoginCredentials model);
         Task<TokenResponse> Register(UserRegisterModel userModel);
-        Task<UserEditModel> Edit(UserEditModel userModel, Guid id);
-        UserDto GetById(Guid id);
+        Task EditUserProfile(UserEditModel userModel, Guid userId);
+        Task<UserDto> GetUserProfile(Guid userId);
     }
     public class UserService : IUserService
     {
-        private readonly IEfRepository<User> _userRepository;
+        private readonly DataBaseContext _context;
         private readonly IJwtUtils _jwtUtils;
         private readonly IMapper _mapper;
-        public UserService(IEfRepository<User> userRepository, IJwtUtils jwtUtils, IMapper mapper)
+        public UserService(DataBaseContext context, IJwtUtils jwtUtils, IMapper mapper)
         {
-            _userRepository = userRepository;
+            _context = context;
             _jwtUtils = jwtUtils;
             _mapper = mapper;
         }
 
-        public TokenResponse Authenticate(LoginCredentials model)
+        public async Task<TokenResponse> Login(LoginCredentials model)
         {
-            var user = _userRepository
-                .GetAll()
-                .SingleOrDefault(x => x.Email == model.Email);
+            var existingUser = await _context.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
 
-            bool isValidPassword = BCrypt.Net.BCrypt.Verify(model.Password, user.Password);
+            if (existingUser == null)
+            {
+                throw new KeyNotFoundException("Invalid login.");
+            }
+
+            bool isValidPassword = BCrypt.Net.BCrypt.Verify(model.Password, existingUser.Password);
 
             if (!isValidPassword) 
             {
-                // todo: logger
-                return null;
+                throw new KeyNotFoundException("Invalid passsword.");
             }
 
-            var token = _jwtUtils.GenerateToken(user);
-
+            var token = _jwtUtils.GenerateToken(existingUser);
             return new TokenResponse(token);
         }
 
         public async Task<TokenResponse> Register(UserRegisterModel model)
         {
-            var user = _mapper.Map<User>(model);
-
-            var existingUser = _userRepository
-                .GetAll()
-                .SingleOrDefault(x => x.Email == user.Email);
+            var existingUser = await _context.Users.SingleOrDefaultAsync(u => u.Email == model.Email);
 
             if (existingUser != null)
             {
-                // todo: logger
-                return null;
+                throw new KeyNotFoundException($"Username {model.Email} is already taken.");
             }
 
-            var addedUser = await _userRepository.Add(user);
+            var registerUser = _mapper.Map<User>(model);
+            await _context.Users.AddAsync(registerUser);
+            await _context.SaveChangesAsync();
 
-            var response = Authenticate(new LoginCredentials
+            var response = await Login(new LoginCredentials
             {
                 Email = model.Email,
                 Password = model.Password,
@@ -69,27 +69,31 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             return response;
         }
 
-        public async Task<UserEditModel> Edit(UserEditModel model, Guid id)
+        public async Task EditUserProfile(UserEditModel model, Guid userId)
         {
-            var existingUser = _userRepository.GetById(id);
+            var existingUser = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
 
-            if (existingUser == null) 
+            if (existingUser == null)
             {
-                return null;
+                throw new KeyNotFoundException($"User with id = {userId} doesn't exist.");
             }
 
             var newUser = _mapper.Map(model, existingUser);
 
-            var response = await _userRepository.Edit(newUser);
-
-
-            return model;
+            _context.Users.Update(newUser);
+            await _context.SaveChangesAsync();
         }
 
-        public UserDto GetById(Guid id) 
+        public async Task<UserDto> GetUserProfile(Guid userId) 
         {
-            var user = _userRepository.GetById(id);
-            var userDto = _mapper.Map<UserDto>(user);
+            var existingUser = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
+
+            if (existingUser == null)
+            {
+                throw new KeyNotFoundException($"User with id = {userId} doesn't exist.");
+            }
+
+            var userDto = _mapper.Map<UserDto>(existingUser);
             return userDto;
         }
     }

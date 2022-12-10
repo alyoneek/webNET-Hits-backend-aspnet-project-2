@@ -5,71 +5,80 @@ using webNET_Hits_backend_aspnet_project_2.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
+using webNET_Hits_backend_aspnet_project_2.Repositories;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using webNET_Hits_backend_aspnet_project_2.Models.Enums;
 
 namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IDishService
     {
-        Task<Dish> AddDish(DishDto model);
-        DishDto GetDishById(Guid id);
-        DishPagedListDto GetAllDishesByParams(FilterQueryParams queryParams);
+        //Task<Dish> AddDish(DishDto model);
+        Task<DishDto> GetConcreteDish(Guid dishId);
+        Task<DishPagedListDto> GetListDishes(FilterQueryParams queryParams);
     }
     public class DishService : IDishService
     {
-        private readonly IEfRepository<Dish> _dishRepository;
-        private readonly DataBaseContext _db;
+        private readonly DataBaseContext _context;
         private readonly IMapper _mapper;
-        public DishService(IEfRepository<Dish> dishRepository, IMapper mapper)
+        public DishService(DataBaseContext context, IMapper mapper)
         {
-            _dishRepository = dishRepository;
+            _context = context;
             _mapper = mapper;
         }
 
-        public async Task<Dish> AddDish(DishDto model)
-        {
-            var dish = _mapper.Map<Dish>(model);
-            var addedDish = await _dishRepository.Add(dish);
+        //public async Task<Dish> AddDish(DishDto model)
+        //{
+        //    var dish = _mapper.Map<Dish>(model);
+        //    var addedDish = await _dishRepository.Add(dish);
 
-            return addedDish;
-        }
+        //    return addedDish;
+        //}
 
-        public DishDto GetDishById(Guid id)
+        public async Task<DishDto> GetConcreteDish(Guid dishId)
         {
-            var dish = _dishRepository.GetById(id);
+            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
 
             if (dish == null)
             {
-                return null;
+                throw new KeyNotFoundException($"Dish with id = {dishId} doesn't exist.");
             }
 
             var dishDto = _mapper.Map<DishDto>(dish);
             return dishDto;
         }
 
-        public DishPagedListDto GetAllDishesByParams(FilterQueryParams queryParams)
+        public async Task<DishPagedListDto> GetListDishes(FilterQueryParams queryParams)
         {
-            //переделать
-            var dishes = _dishRepository.GetAll();
+            var dishes = await _context.Dishes.ToListAsync();
 
             if (queryParams.Vegetarian)
             {
-                dishes = dishes.Where(d => d.Vegetarian).ToList(); 
+                dishes = dishes.Where(d => d.Vegetarian).ToList();
             }
 
-            PageInfoModel pagination = new PageInfoModel(dishes.Count, queryParams.Page);
+            PageInfoModel pagination = new PageInfoModel(dishes.Count, queryParams.Page);  //todo
 
             if (queryParams.Page > pagination.Count)
             {
-                return null;
+                throw new KeyNotFoundException("Invalid value for attribute page.");
             }
 
-            var pagedDishes = dishes.Skip((pagination.Current - 1) * pagination.Size).Take(pagination.Size).ToList();
-
-            List<DishDto> pagedDishesDto = new List<DishDto>();
-            foreach (Dish dish in pagedDishes)
+            dishes = queryParams.Sorting switch
             {
-                pagedDishesDto.Add(_mapper.Map<DishDto>(dish));
-            }
+                DishSorting.NameAsc => dishes.OrderBy(d => d.Name).ToList(),
+                DishSorting.NameDesc => dishes.OrderByDescending(d => d.Name).ToList(),
+                DishSorting.PriceAsc => dishes.OrderBy(d => d.Price).ToList(),
+                DishSorting.PriceDesc => dishes.OrderByDescending(d => d.Price).ToList(),
+                DishSorting.RatingAsc => dishes.OrderBy(d => d.Rating).ToList(),
+                DishSorting.RatingDesc => dishes.OrderByDescending(d => d.Rating).ToList(),
+                _ => dishes.OrderBy(d => d.Name).ToList(),
+            };
+            var pagedDishes = dishes
+                .Skip((pagination.Current - 1) * pagination.Size)
+                .Take(pagination.Size)
+                .ToList(); ;
+            var pagedDishesDto = _mapper.Map<List<Dish>, List<DishDto>>(pagedDishes);
 
             return new DishPagedListDto(pagedDishesDto, pagination);
         }

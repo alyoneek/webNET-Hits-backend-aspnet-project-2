@@ -12,6 +12,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Models
         public string FullName { get; set; }
         public string? Address { get; set; }
         public DateTime? BirthDate { get; set; }
+        [Required]
         [ValidEnum(ErrorMessage="The field Gender is required.")]
         public GenderType? Gender { get; set; }
         [Phone]

@@ -26,7 +26,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
                 issuer: authParams.Issuer,
                 audience: authParams.Audience,
                 notBefore: DateTime.UtcNow,
-                claims: new[] { new Claim("id", user.Id.ToString()), new Claim("email", user.Email) },
+                claims: new[] { new Claim("id", user.Id.ToString()) },
                 expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(authParams.Lifetime)),
                 signingCredentials: new SigningCredentials(authParams.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
 

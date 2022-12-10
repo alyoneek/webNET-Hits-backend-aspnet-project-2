@@ -5,7 +5,9 @@ using System.Text.Json.Serialization;
 using webNET_Hits_backend_aspnet_project_2;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Profiles;
+using webNET_Hits_backend_aspnet_project_2.Repositories;
 using webNET_Hits_backend_aspnet_project_2.Services;
+using webNET_Hits_backend_aspnet_project_2.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,15 +16,27 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
+// DB
+builder.Services.AddDbContext<DataBaseContext>(
+    o => o.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+);
+
+// Repositories 
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IDishRepository, DishRepository>();
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDishService, DishService>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped<IJwtUtils, JwtUtils>();
-builder.Services.AddScoped(typeof(IEfRepository<>), typeof(UserRepository<>));
 
+builder.Services.AddScoped<IJwtUtils, JwtUtils>();
 builder.Services.Configure<JwtConfigurations>(
     builder.Configuration.GetSection("Auth"));
 
@@ -33,15 +47,11 @@ builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
-// DB
-builder.Services.AddDbContext<DataBaseContext>(
-    o => o.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
-);
-
 // AutoMapper
 builder.Services.AddAutoMapper(typeof(UserProfile), typeof(DishProfile), typeof(BasketProfile));
 
-builder.Services.AddSwaggerGen(option => {
+builder.Services.AddSwaggerGen(option =>
+{
     option.SwaggerDoc("v1", new OpenApiInfo { Title = "Delivery.Api", Version = "v1" });
     option.MapType<TimeSpan?>(() => new OpenApiSchema { Type = "string", Example = new OpenApiString("00:00:00") });
     option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
+using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Services;
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
@@ -19,51 +21,48 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
         [Authorize]
         [HttpGet]
-        public IActionResult GetBasketInfo()
+        public async Task<ActionResult<IEnumerable<DishBasketDto>>> Get()
         {
-            var response = _basketService.GetBasketInfo((Guid)HttpContext.Items["UserId"]);
-
-            if (response == null)
+            try
             {
-                return Forbid();
+                var response = await _basketService.GetUserCartInfo((Guid)HttpContext.Items["UserId"]);
+                return Ok(response);
             }
-
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [Authorize]
         [HttpPost("dish/{dishId:Guid}")]
-        public async Task<IActionResult> AddDishToBasket([FromRoute] Guid dishId)
+        public async Task<IActionResult> Post([FromRoute] Guid dishId)
         {
-            // странное
-            var userId = (Guid)HttpContext.Items["UserId"];
-            if (userId == null)
+            try
             {
-                return Forbid();
+                var userId = (Guid)HttpContext.Items["UserId"];
+                await _basketService.AddDishToCart(userId, dishId);
+                return Ok();
             }
-
-            var response = await _basketService.AddDishToBasket(userId, dishId);
-
-            if (response == null)
+            catch (KeyNotFoundException e)
             {
-                return NotFound();
+                return NotFound(new Response { Message = e.Message });
             }
-
-            return Ok(response);
         }
 
         [Authorize]
         [HttpDelete("dish/{dishId:Guid}")]
-        public async Task<IActionResult> DeleteDishFromBasket([FromRoute] Guid dishId, [FromQuery] bool? increase)
+        public async Task<IActionResult> Delete([FromRoute] Guid dishId, [FromQuery] bool? increase)
         {
-            var response = await _basketService.DeleteDishFromBasket((Guid)HttpContext.Items["UserId"], dishId, increase);
-
-            if (response == null)
+            try
             {
-                return NotFound();
+                await _basketService.DeleteDishFromCart((Guid)HttpContext.Items["UserId"], dishId, increase);
+                return Ok();
             }
-
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
     }
 }

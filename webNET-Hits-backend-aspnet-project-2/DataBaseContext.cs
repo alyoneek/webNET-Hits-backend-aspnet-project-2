@@ -37,9 +37,6 @@ namespace webNET_Hits_backend_aspnet_project_2
                 .IsRequired()
                 .HasForeignKey(d => d.CartId);
 
-            modelBuilder.Entity<DishInBasket>()
-                .HasKey(d => new { d.CartId, d.DishId });
-
             modelBuilder.Entity<Order>()
                 .Property(o => o.Status)
                 .HasConversion(

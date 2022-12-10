@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
-using webNET_Hits_backend_aspnet_project_2.Models.Entities;
+using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Services;
 
 namespace webNET_Hits_backend_aspnet_project_2.Controllers
@@ -18,51 +18,61 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Authenticate([FromBody] LoginCredentials model)
+        public async Task<ActionResult<TokenResponse>> Post([FromBody] LoginCredentials model)
         {
-            var response = _userService.Authenticate(model);
-
-            if (response == null)
+            try
             {
-                return BadRequest(new { message = "Email or password is incorrect" });
+                var response = await _userService.Login(model);
+                return Ok(response);
             }
-
-            return Ok(response);
+            catch(KeyNotFoundException e) 
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserRegisterModel model)
+        public async Task<ActionResult<TokenResponse>> Post([FromBody] UserRegisterModel model)
         {
-            var response = await _userService.Register(model);
-
-            if (response == null)
+            try
             {
-                return BadRequest(new { DuplicateUserName = $"Username {model.Email} is already taken." });
+                var response = await _userService.Register(model);
+                return Ok(response);
             }
-
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [Authorize]
         [HttpGet("profile")]
-        public IActionResult GetUserInfo()
+        public async Task<ActionResult<UserDto>> Get()
         {
-            var user = _userService.GetById((Guid)HttpContext.Items["UserId"]);
-            return Ok(user);
+            try
+            {
+                var response = await _userService.GetUserProfile((Guid)HttpContext.Items["UserId"]);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
 
         [Authorize]
         [HttpPut("profile")]
-        public async Task<IActionResult> ChangeUserInfo([FromBody] UserEditModel model)
+        public async Task<IActionResult> Put([FromBody] UserEditModel model)
         {
-            var response = await _userService.Edit(model, (Guid)HttpContext.Items["UserId"]);
-
-            if (response == null)
+            try
             {
-                return BadRequest();
+                await _userService.EditUserProfile(model, (Guid)HttpContext.Items["UserId"]);
+                return Ok();
             }
-
-            return Ok(response);
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
         }
     }
 }

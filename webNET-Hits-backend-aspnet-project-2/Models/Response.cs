@@ -2,13 +2,13 @@
 {
     public class Response
     {
-        public string? Status { get; set; }
+        public string? Status { get; set; } = "Error";
         public string? Message { get; set;}
 
-        public Response(string status, string message)
-        {
-            Status = status;
-            Message = message;
-        }
+        //public Response(string status, string message)
+        //{
+        //    Status = status;
+        //    Message = message;
+        //}
     }
 }

@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 
@@ -7,50 +7,45 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IBasketService
     {
-        IEnumerable<DishBasketDto> GetBasketInfo(Guid userId);
-        Task<DishInBasket> AddDishToBasket(Guid userId, Guid dishId);
-        Task<DishInBasket> DeleteDishFromBasket(Guid userId, Guid dishId, bool? increase);
+        Task<IEnumerable<DishBasketDto>> GetUserCartInfo(Guid userId);
+        Task AddDishToCart(Guid userId, Guid dishId);
+        Task DeleteDishFromCart(Guid userId, Guid dishId, bool? increase);
     }
 
 
     public class BasketService : IBasketService
     {
 
-        private readonly IEfRepository<DishInBasket> _basketRepository;
-        private readonly IEfRepository<Dish> _dishRepository;
+        private readonly DataBaseContext _context;
         private readonly IMapper _mapper;
 
-        public BasketService(IEfRepository<DishInBasket> basketRepository, IEfRepository<Dish> dishRepository, IMapper mapper)
+        public BasketService(DataBaseContext context, IMapper mapper)
         {
-            _basketRepository = basketRepository;
-            _dishRepository = dishRepository;
+            _context = context;
             _mapper = mapper;
         }
 
-        public IEnumerable<DishBasketDto> GetBasketInfo(Guid userId)
+        public async Task<IEnumerable<DishBasketDto>> GetUserCartInfo(Guid userId)
         {
-            // нет проверки юзера
-            // подтягивание кринге
-            var dishes = _dishRepository.GetAll();
-            var dishesInBasket = _basketRepository.GetAll().Where(d => d.CartId == userId && d.OrderId == null).ToList();
-
+            var dishesInBasket = await _context.DishesInBasket
+                .Include(d => d.Dish)
+                .Where(d => d.CartId == userId && d.OrderId == null)
+                .ToListAsync(); ;
             var dishesInBasketDto = _mapper.Map<List<DishInBasket>, List<DishBasketDto>>(dishesInBasket);
 
             return dishesInBasketDto;
         }
 
-        public async Task<DishInBasket> AddDishToBasket(Guid userId, Guid dishId)
+        public async Task AddDishToCart(Guid userId, Guid dishId)
         {
-            var dish = _dishRepository.GetById(dishId);
+            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
             if (dish == null)
             {
-                return null;
+                throw new KeyNotFoundException($"Dish with id = {dishId} doesn't exist.");
             }
 
-            var cartItem = _basketRepository.GetAll()
-                .SingleOrDefault(c => c.CartId == userId && c.DishId == dishId && c.OrderId == null);
-
-            DishInBasket addedDish;
+            var cartItem = await _context.DishesInBasket
+                .SingleOrDefaultAsync(c => c.CartId == userId && c.DishId == dishId && c.OrderId == null); 
 
             if (cartItem == null)
             {
@@ -59,55 +54,40 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                     DishId = dishId,
                     CartId = userId,
                     Amount = 1,
-                    Dish = dish,
                 };
 
-                addedDish = await _basketRepository.Add(cartItem);
+                await _context.DishesInBasket.AddAsync(cartItem);
+                await _context.SaveChangesAsync();
             }
             else
             {
                 cartItem.Amount++;
-                addedDish = await _basketRepository.Edit(cartItem);
+                _context.DishesInBasket.Update(cartItem);
+                await _context.SaveChangesAsync();
             }
-
-            return addedDish;
         }
 
-        public async Task<DishInBasket> DeleteDishFromBasket(Guid userId, Guid dishId, bool? increase)
+        public async Task DeleteDishFromCart(Guid userId, Guid dishId, bool? increase)
         {
-            var dish = _basketRepository.GetAll()
-                .SingleOrDefault(d => d.CartId == userId && d.DishId == dishId && d.OrderId == null);
+            var cartItem = await _context.DishesInBasket
+                .SingleOrDefaultAsync(c => c.CartId == userId && c.DishId == dishId && c.OrderId == null);
 
-            if (dish == null)
+            if (cartItem == null)
             {
-                return null;
+                throw new KeyNotFoundException($"Dish with id = {dishId} isn't in cart.");
             }
 
-            DishInBasket removed;
-
-            if (increase == null || increase == false || increase == true && dish.Amount == 1)
+            if (increase == null || increase == false || increase == true && cartItem.Amount == 1)
             {
-                removed = await _basketRepository.Delete(dish);
+                _context.DishesInBasket.Remove(cartItem);
+                await _context.SaveChangesAsync();
             } 
             else
             {
-                dish.Amount--;
-                removed = await _basketRepository.Edit(dish);
+                cartItem.Amount--;
+                _context.DishesInBasket.Update(cartItem);
+                await _context.SaveChangesAsync();
             }
-
-            return removed; 
         }
-
-        //public void EmptyCart()
-        //{
-        //    ShoppingCartId = GetCartId();
-        //    var cartItems = _db.ShoppingCartItems.Where(
-        //        c => c.CartId == ShoppingCartId);
-        //    foreach (var cartItem in cartItems)
-        //    {
-        //        _db.ShoppingCartItems.Remove(cartItem);
-        //    }           
-        //    _db.SaveChanges();
-        //}
     }
 }
