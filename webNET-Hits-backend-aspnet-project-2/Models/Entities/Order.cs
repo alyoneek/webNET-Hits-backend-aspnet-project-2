@@ -11,6 +11,5 @@ namespace webNET_Hits_backend_aspnet_project_2.Models.Entities
         public decimal Price { get; set; }
         public string Address { get; set; }
         public IEnumerable<DishInBasket> Dishes { get; set; }
-        public User User { get; set; }
     }
 }

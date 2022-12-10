@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
+using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
@@ -32,6 +34,21 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         //    return Ok(addedDishes);
         //}
 
+        [HttpGet]
+        public async Task<ActionResult<DishPagedListDto>> Get([FromQuery] QueryParams queryParams)
+        {
+            try
+            {
+                FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
+                var response = await _dishService.GetListDishes(filterQueryParams);
+                return Ok(response);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
+        }
+
         [HttpGet("{id:Guid}")]
         public async Task<ActionResult<DishDto>> Get([FromRoute] Guid id)
         {
@@ -46,14 +63,29 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             }
         }
 
-        [HttpGet]
-        public async Task<ActionResult<DishPagedListDto>> Get([FromQuery] QueryParams queryParams)
+        [Authorize]
+        [HttpGet("{id:Guid}/rating/check")]
+        public async Task<ActionResult<Boolean>> GetBool([FromRoute] Guid id)
         {
             try
             {
-                FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
-                var response = await _dishService.GetListDishes(filterQueryParams);
+                var response = await _dishService.CheckAbilityToSetRating(id, (Guid)HttpContext.Items["UserId"]);
                 return Ok(response);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(new Response { Message = e.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("{id:Guid}/rating")]
+        public async Task<IActionResult> Post([FromRoute] Guid id, [FromQuery][Range(0, 10)] int ratingScore)
+        {
+            try
+            {
+                await _dishService.SetRating(id, (Guid)HttpContext.Items["UserId"], ratingScore);
+                return Ok();
             }
             catch (KeyNotFoundException e)
             {

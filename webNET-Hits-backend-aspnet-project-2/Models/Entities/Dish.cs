@@ -9,5 +9,6 @@
         public Boolean Vegetarian { get; set; }
         public double? Rating { get; set; }
         public int DishCategoryId { get; set; }
+        public IEnumerable<Rating> Ratings { get; set; }
     }
 }

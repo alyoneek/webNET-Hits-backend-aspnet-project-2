@@ -16,6 +16,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         //Task<Dish> AddDish(DishDto model);
         Task<DishDto> GetConcreteDish(Guid dishId);
         Task<DishPagedListDto> GetListDishes(FilterQueryParams queryParams);
+        Task<bool> CheckAbilityToSetRating(Guid dishId, Guid userId);
+        Task SetRating(Guid dishId, Guid userId, int ratingScore);
     }
     public class DishService : IDishService
     {
@@ -81,6 +83,57 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             var pagedDishesDto = _mapper.Map<List<Dish>, List<DishDto>>(pagedDishes);
 
             return new DishPagedListDto(pagedDishesDto, pagination);
+        }
+
+        public async Task<bool> CheckAbilityToSetRating(Guid dishId, Guid userId)
+        {
+            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
+
+            if (dish == null)
+            {
+                throw new KeyNotFoundException($"Dish with id = {dishId} doesn't exist.");
+            }
+
+            var dishDelivery = await _context.Orders
+                .Include(o => o.Dishes)
+                .Where(o => o.UserId == userId && o.Status == OrderStatus.Delivered && o.Dishes.Any(d => d.DishId == dishId))
+                .ToListAsync();
+
+            if (dishDelivery.Count == 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        public async Task SetRating(Guid dishId, Guid userId, int ratingScore)
+        {
+            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
+
+            if (dish == null)
+            {
+                throw new KeyNotFoundException($"Dish with id = {dishId} doesn't exist.");
+            }
+
+            if (! (await CheckAbilityToSetRating(dishId, userId)))
+            {
+                throw new KeyNotFoundException("User can't set rating on dish that wasn't ordered.");
+            }
+
+            var existingRating = await _context.Ratings.SingleOrDefaultAsync(r => r.UserId == userId && r.DishId == dishId);
+
+            if (existingRating == null)
+            {
+                await _context.Ratings.AddAsync(new Rating { DishId = dishId, UserId = userId, RatingScore = ratingScore });
+            }      
+            else
+            {
+                existingRating.RatingScore = ratingScore;
+                _context.Ratings.Update(existingRating);
+            }
+
+            dish.Rating = dish.Ratings.ToList().Sum(r => r.RatingScore) / dish.Ratings.ToList().Count;
+            await _context.SaveChangesAsync();
         }
     }
 }

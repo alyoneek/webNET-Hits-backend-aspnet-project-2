@@ -19,5 +19,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Models.Entities
         public string? PhoneNumber { get; set; }
 
         public IEnumerable<DishInBasket> DishesInBasket { get; set; }
+        public IEnumerable<Order> Orders { get; set; }
+        public IEnumerable<Rating> Ratings { get; set; }
     }
 }
