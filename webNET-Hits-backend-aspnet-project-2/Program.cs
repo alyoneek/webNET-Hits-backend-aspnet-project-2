@@ -12,8 +12,8 @@ using webNET_Hits_backend_aspnet_project_2.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -78,6 +78,10 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
+// global error handler
+app.UseMiddleware<ErrorHandlerMiddleware>();
+
+// custom jwt auth middleware
 app.UseMiddleware<JwtMiddleware>();
 
 // Configure the HTTP request pipeline.

@@ -37,60 +37,32 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet]
         public async Task<ActionResult<DishPagedListDto>> Get([FromQuery] QueryParams queryParams)
         {
-            try
-            {
-                FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
-                var response = await _dishService.GetListDishes(filterQueryParams);
-                return Ok(response);
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(new Response { Message = e.Message });
-            }
+            FilterQueryParams filterQueryParams = _mapper.Map(queryParams, new FilterQueryParams());
+            var response = await _dishService.GetListDishes(filterQueryParams);
+            return Ok(response);
         }
 
         [HttpGet("{id:Guid}")]
         public async Task<ActionResult<DishDto>> Get([FromRoute] Guid id)
         {
-            try
-            {
-                var response = await _dishService.GetConcreteDish(id);
-                return Ok(response);
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(new Response { Message = e.Message });
-            }
+            var response = await _dishService.GetConcreteDish(id);
+            return Ok(response);
         }
 
         [Authorize]
         [HttpGet("{id:Guid}/rating/check")]
-        public async Task<ActionResult<Boolean>> GetBool([FromRoute] Guid id)
+        public async Task<ActionResult> GetBool([FromRoute] Guid id)
         {
-            try
-            {
-                var response = await _dishService.CheckAbilityToSetRating(id, (Guid)HttpContext.Items["UserId"]);
-                return Ok(response);
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(new Response { Message = e.Message });
-            }
+            var response = await _dishService.CheckAbilityToSetRating(id, (Guid)HttpContext.Items["UserId"]);
+            return Ok(response);
         }
 
         [Authorize]
         [HttpPost("{id:Guid}/rating")]
-        public async Task<IActionResult> Post([FromRoute] Guid id, [FromQuery][Range(0, 10)] int ratingScore)
+        public async Task<ActionResult> Post([FromRoute] Guid id, [FromQuery][Range(0, 10)] int ratingScore)
         {
-            try
-            {
-                await _dishService.SetRating(id, (Guid)HttpContext.Items["UserId"], ratingScore);
-                return Ok();
-            }
-            catch (KeyNotFoundException e)
-            {
-                return NotFound(new Response { Message = e.Message });
-            }
+            await _dishService.SetRating(id, (Guid)HttpContext.Items["UserId"], ratingScore);
+            return Ok();
         }
     }
 }
