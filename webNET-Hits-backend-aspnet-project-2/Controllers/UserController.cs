@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Text.RegularExpressions;
+using webNET_Hits_backend_aspnet_project_2.Attributes;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
@@ -18,21 +20,30 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _userService = userService;
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<TokenResponse>> Post([FromBody] LoginCredentials model)
-        {
-            var response = await _userService.Login(model);
-            return Ok(response);
-        }
-
         [HttpPost("register")]
         public async Task<ActionResult<TokenResponse>> Post([FromBody] UserRegisterModel model)
         {
-            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var response = await _userService.Register(model);
             return Ok(response);
-            
-       
+
+
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<TokenResponse>> Post([FromBody] LoginCredentials model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = await _userService.Login(model);
+            return Ok(response);
         }
 
         [Authorize]
@@ -47,6 +58,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpPut("profile")]
         public async Task<ActionResult> Put([FromBody] UserEditModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             await _userService.EditUserProfile(model, (Guid)HttpContext.Items["UserId"]);
             return Ok();
         }

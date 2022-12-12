@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using webNET_Hits_backend_aspnet_project_2.Models;
 
-namespace webNET_Hits_backend_aspnet_project_2.Models
+namespace webNET_Hits_backend_aspnet_project_2.Helpers
 {
     public class PaginatedList<T> : List<T>
     {
@@ -10,7 +11,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Models
         {
             Pagination = pageInfo;
 
-            this.AddRange(items);
+            AddRange(items);
         }
 
         public bool HasPreviousPage => Pagination.Current > 1;

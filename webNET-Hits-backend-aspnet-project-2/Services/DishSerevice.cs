@@ -89,7 +89,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (! await CheckAbilityToSetRating(dishId, userId))
             {
-                //throw new KeyNotFoundException("User can't set rating on dish that wasn't ordered");   400
+                throw new InvalidOperationException("User can't set rating on dish that wasn't ordered");   //400
             }
 
             var existingRating = await _context.Ratings.SingleOrDefaultAsync(r => r.UserId == userId && r.DishId == dishId);
@@ -104,8 +104,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 _context.Ratings.Update(existingRating);
             }
 
-            dish.Rating = dish.Ratings.ToList().Sum(r => r.RatingScore) / dish.Ratings.ToList().Count;
-            await _context.SaveChangesAsync();
+            await CalculateTotalDishRating(dish);
         }
 
         private async Task<PaginatedList<Dish>> filterDishes(IQueryable<Dish> dishes, FilterQueryParams queryParams)
@@ -119,7 +118,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (queryParams.Page > pagination.Count)
             {
-                //throw new KeyNotFoundException("Invalid value for attribute page.");    400
+                throw new ArgumentOutOfRangeException(null, "Invalid value for attribute page");    //400
             }
 
             dishes = queryParams.Sorting switch
@@ -135,6 +134,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             var pagedDishes = await PaginatedList<Dish>.CreateAsync(dishes, pagination);
             return pagedDishes;
+        }
+
+        private async Task CalculateTotalDishRating(Dish dish)
+        {
+            dish.Rating = dish.Ratings.ToList().Sum(r => r.RatingScore) / dish.Ratings.ToList().Count;
+            await _context.SaveChangesAsync();
         }
     }
 }

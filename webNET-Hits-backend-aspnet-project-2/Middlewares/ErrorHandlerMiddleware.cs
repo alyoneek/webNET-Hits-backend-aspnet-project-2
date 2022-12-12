@@ -7,9 +7,10 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using webNET_Hits_backend_aspnet_project_2.Exceptions;
 using webNET_Hits_backend_aspnet_project_2.Models;
 
-namespace webNET_Hits_backend_aspnet_project_2.Helpers
+namespace webNET_Hits_backend_aspnet_project_2.Middlewares
 {
     public class ErrorHandlerMiddleware
     {
@@ -32,6 +33,36 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
             {
                 //_logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.NotFound);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                //_logger.LogError($"Something went wrong: {ex}");
+                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
+            }
+            catch (InvalidOperationException ex)
+            {
+                //_logger.LogError($"Something went wrong: {ex}");
+                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
+            }
+            catch (DublicateValueException ex)
+            {
+                //_logger.LogError($"Something went wrong: {ex}");
+                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
+            }
+            catch (FailedAuthorizationException ex)
+            {
+                //_logger.LogError($"Something went wrong: {ex}");
+                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
+            }
+            catch (MismatchedValuesException ex)
+            {
+                //_logger.LogError($"Something went wrong: {ex}");
+                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.Forbidden);
+            }
+            catch (Exception ex)
+            {
+                //_logger.LogError($"Something went wrong: {ex}");
+                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.InternalServerError);
             }
         }
         private async Task HandleExceptionAsync(HttpContext context, Exception error, HttpStatusCode statusCode)

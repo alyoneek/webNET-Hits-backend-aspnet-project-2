@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using System.Web.Helpers;
+using webNET_Hits_backend_aspnet_project_2.Exceptions;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
@@ -33,7 +33,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (existingUser != null)
             {
-                //throw new KeyNotFoundException($"Username {model.Email} is already taken."); 400
+                throw new DublicateValueException($"Email {model.Email} is already taken"); //400
             }
 
             var registerUser = _mapper.Map<User>(model);
@@ -54,14 +54,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (user == null)
             {
-                //throw new KeyNotFoundException("Invalid login.");   400
+                throw new FailedAuthorizationException("Invalid login");  
             }
 
             bool isValidPassword = BCrypt.Net.BCrypt.Verify(model.Password, user.Password);
 
             if (!isValidPassword) 
             {
-                //throw new KeyNotFoundException("Invalid passsword.");  400
+                throw new FailedAuthorizationException("Invalid passsword");  
             }
 
             var token = _jwtUtils.GenerateToken(user);
@@ -73,7 +73,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (user == null)
             {
-                //throw new KeyNotFoundException($"User with id = {userId} doesn't exist");   ?
+                //throw new KeyNotFoundException($"User with id = {userId} doesn't exist in database");   ?
             }
 
             var userDto = _mapper.Map<UserDto>(user);
@@ -85,7 +85,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (user == null)
             {
-                //throw new KeyNotFoundException($"User with id = {userId} doesn't exist."); ?
+                //throw new KeyNotFoundException($"User with id = {userId} doesn't exist in database"); ?
             }
 
             var newUser = _mapper.Map(model, user);

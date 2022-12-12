@@ -8,6 +8,7 @@ using webNET_Hits_backend_aspnet_project_2.Profiles;
 using webNET_Hits_backend_aspnet_project_2.Repositories;
 using webNET_Hits_backend_aspnet_project_2.Services;
 using webNET_Hits_backend_aspnet_project_2.Models;
+using webNET_Hits_backend_aspnet_project_2.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 

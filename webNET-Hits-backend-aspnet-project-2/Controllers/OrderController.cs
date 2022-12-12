@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using webNET_Hits_backend_aspnet_project_2.Attributes;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
@@ -21,7 +22,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet("{id:Guid}")]
         public async Task<ActionResult<OrderDto>> Get([FromRoute] Guid id)
         {
-            var response = await _orderService.GetConcreteOrder(id);
+            var response = await _orderService.GetConcreteOrder((Guid)HttpContext.Items["UserId"], id);
             return Ok(response);
         }
 
@@ -38,6 +39,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpPost]
         public async Task<ActionResult> Post([FromBody] OrderCreateDto model)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var userId = (Guid)HttpContext.Items["UserId"];
             await _orderService.CreateOrder(userId, model);
             return Ok();
@@ -47,7 +53,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpPost("{id:Guid}/status")]
         public async Task<ActionResult> Post([FromRoute] Guid id)
         {
-            await _orderService.ConfirmOrderDelivery(id);
+            await _orderService.ConfirmOrderDelivery((Guid)HttpContext.Items["UserId"], id);
             return Ok();
         }
     }

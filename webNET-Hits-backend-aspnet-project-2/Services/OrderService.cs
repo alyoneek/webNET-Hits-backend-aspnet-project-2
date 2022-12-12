@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using webNET_Hits_backend_aspnet_project_2.Exceptions;
 using webNET_Hits_backend_aspnet_project_2.Models.DtoModels;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Models.Enums;
@@ -9,23 +10,25 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IOrderService
     {
-        Task<OrderDto> GetConcreteOrder(Guid orderId);
+        Task<OrderDto> GetConcreteOrder(Guid userId, Guid orderId);
         Task<IEnumerable<OrderInfoDto>> GetListOrders(Guid userId);
         Task CreateOrder(Guid userId, OrderCreateDto model);
-        Task ConfirmOrderDelivery(Guid orderId);
+        Task ConfirmOrderDelivery(Guid userId, Guid orderId);
     }
     public class OrderService : IOrderService
     {
         private readonly DataBaseContext _context;
+        private readonly IBasketService _basketService;
         private readonly IMapper _mapper;
 
-        public OrderService(DataBaseContext context, IMapper mapper)
+        public OrderService(DataBaseContext context, IBasketService basketService, IMapper mapper)
         {
             _context = context;
+            _basketService = basketService;
             _mapper = mapper;
         }
 
-        public async Task<OrderDto> GetConcreteOrder(Guid orderId)
+        public async Task<OrderDto> GetConcreteOrder(Guid userId, Guid orderId)
         {
             var order = await _context.Orders
                 .Include(o => o.Dishes)
@@ -34,7 +37,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (order == null)
             {
-                throw new KeyNotFoundException($"Order with id = {orderId} doesn't exist.");
+                throw new KeyNotFoundException($"Order with id = {orderId} doesn't exist in database");
+            }
+
+            if (order.UserId != userId)
+            {
+                throw new MismatchedValuesException($"User with id={userId} has insufficient rights");
             }
 
             var orderDto = _mapper.Map<OrderDto>(order);
@@ -54,11 +62,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             var dishesInCart = await _context.DishesInBasket
                 .Include(d => d.Dish)
-                .Where(d => d.CartId == userId && d.OrderId == null).ToListAsync();
+                .Where(d => d.CartId == userId && d.OrderId == null)
+                .ToListAsync();
 
             if (dishesInCart.Count == 0)
             {
-                throw new KeyNotFoundException($"Empty basket for user with id={userId}");
+                throw new InvalidOperationException($"Empty basket for user with id={userId}");  //400
             }
 
             var price = GetTotalOrderPrice(dishesInCart);
@@ -67,33 +76,38 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             var addedOrder = await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
 
-            await EmptyBasket(dishesInCart, addedOrder.Entity.Id);
+            await _basketService.ExcludeOrdedDishes(userId, addedOrder.Entity.Id);
         }
 
-        public async Task ConfirmOrderDelivery(Guid orderId)
+        public async Task ConfirmOrderDelivery(Guid userId, Guid orderId)
         {
             var order = await _context.Orders.SingleOrDefaultAsync(o => o.Id == orderId);
+
             if (order == null)
             {
-                throw new KeyNotFoundException($"Order with id={orderId} doesn't exist.");
+                throw new KeyNotFoundException($"Order with id={orderId} doesn't exist in database");
             }
+
+            if (order.UserId != userId)
+            {
+                throw new MismatchedValuesException($"User with id={userId} has insufficient rights");
+            }
+
+            if (order.Status == OrderStatus.Delivered)
+            {
+                throw new DublicateValueException($"Can't update status for order with id={orderId}");
+            }
+
             order.Status = OrderStatus.Delivered;
 
             _context.Orders.Update(order);
             await _context.SaveChangesAsync();
         }
 
-        private decimal GetTotalOrderPrice(IEnumerable<DishInBasket> dishesInCart)
+        private decimal GetTotalOrderPrice(IEnumerable<DishInBasket> orderedDishes)
         {
-            decimal totalPrice = dishesInCart.Sum(d => d.Dish.Price * d.Amount);
+            decimal totalPrice = orderedDishes.Sum(d => d.Dish.Price * d.Amount);
             return totalPrice;
-        }
-
-        private async Task EmptyBasket(List<DishInBasket> dishesInBasket, Guid orderId)
-        {
-            dishesInBasket.ForEach(d => d.OrderId = orderId);
-            _context.DishesInBasket.UpdateRange(dishesInBasket);
-            await _context.SaveChangesAsync();
         }
     }
 }
