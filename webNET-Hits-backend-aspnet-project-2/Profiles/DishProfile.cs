@@ -17,6 +17,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Profiles
                 .ForMember(dst => dst.Category, opt => opt.MapFrom(src => src.DishCategoryId));
 
             CreateMap<QueryParams, FilterQueryParams>()
+                .ForMember(dest => dest.Categories, opt => opt.Condition(src => src.Categories != null))
                 .ForMember(dest => dest.Page, opt => opt.Condition(src => src.Page != null))
                 .ForMember(dest => dest.Vegetarian, opt => opt.Condition(src => src.Vegetarian != null));
         }

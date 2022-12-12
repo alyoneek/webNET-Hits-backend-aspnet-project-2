@@ -109,6 +109,9 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         private async Task<PaginatedList<Dish>> filterDishes(IQueryable<Dish> dishes, FilterQueryParams queryParams)
         {
+            var cetegoriesArray = queryParams.Categories;
+            dishes = dishes.Where(d => cetegoriesArray.Contains((DishCategoryType)d.DishCategoryId));
+
             if (queryParams.Vegetarian)
             {
                 dishes = dishes.Where(d => d.Vegetarian);

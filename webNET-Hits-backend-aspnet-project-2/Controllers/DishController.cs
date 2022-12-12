@@ -52,7 +52,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
 
         [Authorize]
         [HttpGet("{id:Guid}/rating/check")]
-        public async Task<ActionResult> GetBool([FromRoute] Guid id)
+        public async Task<ActionResult> Check([FromRoute] Guid id)
         {
             var response = await _dishService.CheckAbilityToSetRating(id, (Guid)HttpContext.Items["UserId"]);
             return Ok(response);

@@ -5,6 +5,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Models
 {
     public class FilterQueryParams
     {
+        public List<DishCategoryType> Categories { get; set; } = Enum.GetValues(typeof(DishCategoryType)).Cast<DishCategoryType>().ToList();
         public bool Vegetarian { get; set; } = false;
         public DishSorting Sorting { get; set; } = DishSorting.NameAsc;
         [Range(1, Int32.MaxValue)]
