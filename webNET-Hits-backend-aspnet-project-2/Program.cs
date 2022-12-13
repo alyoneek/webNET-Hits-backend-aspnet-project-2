@@ -22,6 +22,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddDbContext<DataBaseContext>(
     o => o.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
 );
+builder.Services.AddStackExchangeRedisCache(options => {
+    options.Configuration = builder.Configuration.GetConnectionString("Redis");
+});
 
 // Repositories 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -79,7 +82,7 @@ builder.Services.AddSwaggerGen(option =>
 
 var app = builder.Build();
 
-// global error handler
+// global error handler middleware
 app.UseMiddleware<ErrorHandlerMiddleware>();
 
 // custom jwt auth middleware

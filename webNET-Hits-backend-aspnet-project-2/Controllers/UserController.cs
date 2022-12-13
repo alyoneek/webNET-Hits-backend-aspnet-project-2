@@ -47,6 +47,15 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         }
 
         [Authorize]
+        [HttpPost("logout")]
+        public async Task<ActionResult> Post()
+        {
+            var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            await _userService.Logout(token);
+            return Ok(new { message = "Logged Out" });
+        }
+
+        [Authorize]
         [HttpGet("profile")]
         public async Task<ActionResult<UserDto>> Get()
         {

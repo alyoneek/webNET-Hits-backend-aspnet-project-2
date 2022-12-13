@@ -34,22 +34,10 @@ namespace webNET_Hits_backend_aspnet_project_2.Middlewares
                 //_logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.NotFound);
             }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                //_logger.LogError($"Something went wrong: {ex}");
-                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
-            }
-            catch (InvalidOperationException ex)
-            {
-                //_logger.LogError($"Something went wrong: {ex}");
-                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
-            }
-            catch (DublicateValueException ex)
-            {
-                //_logger.LogError($"Something went wrong: {ex}");
-                await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
-            }
-            catch (FailedAuthorizationException ex)
+            catch (Exception ex) when (ex is ArgumentOutOfRangeException ||
+                              ex is InvalidOperationException ||
+                              ex is DublicateValueException ||
+                              ex is FailedAuthorizationException)
             {
                 //_logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);

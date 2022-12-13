@@ -7,12 +7,10 @@ namespace webNET_Hits_backend_aspnet_project_2.Middlewares
     public class JwtMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
 
-        public JwtMiddleware(RequestDelegate next, ILogger<JwtMiddleware> logger)
+        public JwtMiddleware(RequestDelegate next)
         {
             _next = next;
-            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context, IJwtUtils jwtUtils)
@@ -22,7 +20,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Middlewares
             var userId = jwtUtils.ValidateToken(token);
             if (userId != null)
             {
-                //_logger.LogInformation(userId.Value.ToString());
                 context.Items["UserId"] = userId;
             }
 

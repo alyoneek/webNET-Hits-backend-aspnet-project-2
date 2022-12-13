@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using webNET_Hits_backend_aspnet_project_2.Exceptions;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
@@ -12,17 +13,20 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
     {
         Task<TokenResponse> Register(UserRegisterModel userModel);
         Task<TokenResponse> Login(LoginCredentials model);
+        Task Logout(string token);
         Task<UserDto> GetUserProfile(Guid userId);
         Task EditUserProfile(UserEditModel userModel, Guid userId);
     }
     public class UserService : IUserService
     {
         private readonly DataBaseContext _context;
+        private readonly IDistributedCache _cache;
         private readonly IJwtUtils _jwtUtils;
         private readonly IMapper _mapper;
-        public UserService(DataBaseContext context, IJwtUtils jwtUtils, IMapper mapper)
+        public UserService(DataBaseContext context, IDistributedCache cache, IJwtUtils jwtUtils, IMapper mapper)
         {
             _context = context;
+            _cache = cache;
             _jwtUtils = jwtUtils;
             _mapper = mapper;
         }
@@ -66,6 +70,14 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             var token = _jwtUtils.GenerateToken(user);
             return new TokenResponse(token);
+        }
+
+        public async Task Logout(string token)
+        {
+            await _cache.SetStringAsync(token, " ", new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+            });
         }
         public async Task<UserDto> GetUserProfile(Guid userId)
         {

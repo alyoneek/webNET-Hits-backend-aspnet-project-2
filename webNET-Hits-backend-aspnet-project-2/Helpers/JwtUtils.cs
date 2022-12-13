@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -8,15 +9,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
 {
     public interface IJwtUtils
     {
-        public string GenerateToken(User user);
-        public Guid? ValidateToken(string token);
+        string GenerateToken(User user);
+        Guid? ValidateToken(string token);
     }
     public class JwtUtils : IJwtUtils
     {
         public readonly IOptions<JwtConfigurations> _authOptions;
-        public JwtUtils(IOptions<JwtConfigurations> authOptions)
+        private readonly IDistributedCache _cache;
+        public JwtUtils(IOptions<JwtConfigurations> authOptions, IDistributedCache cache)
         {
             _authOptions = authOptions;
+            _cache = cache;
         }
 
         public string GenerateToken(User user)
@@ -35,7 +38,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Helpers
 
         public Guid? ValidateToken(string token)
         {
-            if (token == null)
+            if (token == null || _cache.GetString(token) != null)
             {
                 return null;
             }
