@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using webNET_Hits_backend_aspnet_project_2;
+using webNET_Hits_backend_aspnet_project_2.Services;
 
 #nullable disable
 

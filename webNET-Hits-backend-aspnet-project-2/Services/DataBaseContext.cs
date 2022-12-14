@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 using webNET_Hits_backend_aspnet_project_2.Models.Entities;
 using webNET_Hits_backend_aspnet_project_2.Models.Enums;
 
-namespace webNET_Hits_backend_aspnet_project_2
+namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public class DataBaseContext : DbContext
     {

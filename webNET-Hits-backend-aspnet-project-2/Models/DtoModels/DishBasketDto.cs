@@ -14,6 +14,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Models.DtoModels
         public decimal TotalPrice { get; set; }
         [Required]
         public int Amount { get; set; }
+        [Url]
         public string? Image { get; set; }
     }
 }
