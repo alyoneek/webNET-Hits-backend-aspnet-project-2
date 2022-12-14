@@ -100,4 +100,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Seed database
+AppDbInitializer.Seed(app);
+
 app.Run();

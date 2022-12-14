@@ -24,10 +24,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Profiles
         private string FormatPhoneNumber(string phoneNumber)
         {
             string cleanedNumber = Regex.Replace(phoneNumber, @"[^\d\+]", "");
-                //phoneNumber.Replace("(", "");
-            //cleaned = phoneNumber.Replace(")", "");
-            //cleaned = phoneNumber.Replace("-", "");
-            //cleaned = phoneNumber.Replace(" ", "");
 
             MatchCollection match = Regex.Matches(cleanedNumber, @"^(\+7)(\d{3})(\d{3})(\d{2})(\d{2})$");
             string convertedNumber = match[0].Groups[1].ToString() + " (" + match[0].Groups[2].ToString() + ") " +
