@@ -25,7 +25,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Attributes
 
         private DateTime ConvertStringToTime(string value)
         {
-            return DateTime.ParseExact(value.ToString(), "dd.MM.yyyy HH:mm:ss",
+            return DateTime.ParseExact(value.ToString(), "dd.MM.yyyy H:mm:ss",
                 System.Globalization.CultureInfo.InvariantCulture);
         }
     }

@@ -23,18 +23,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
             _mapper = mapper;
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> addDishes([FromBody] IEnumerable<DishDto> collectionDishes)
-        //{
-        //    List<Dish> addedDishes = new List<Dish>();
-        //    foreach (DishDto dish in collectionDishes)
-        //    {
-        //        var response = await _dishService.AddDish(dish);
-        //        addedDishes.Add(response);
-        //    }
-        //    return Ok(addedDishes);
-        //}
-
         [HttpGet]
         public async Task<ActionResult<DishPagedListDto>> Get([FromQuery] QueryParams queryParams)
         {
@@ -54,15 +42,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet("{id:Guid}/rating/check")]
         public async Task<ActionResult> Check([FromRoute] Guid id)
         {
-            var response = await _dishService.CheckAbilityToSetRating(id, (Guid)HttpContext.Items["UserId"]);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            var response = await _dishService.CheckAbilityToSetRating(id, userId);
             return Ok(response);
         }
 
         [Authorize]
         [HttpPost("{id:Guid}/rating")]
-        public async Task<ActionResult> Post([FromRoute] Guid id, [FromQuery][Range(0, 10)] int ratingScore)
+        public async Task<ActionResult> Post([FromRoute] Guid id, [FromQuery][Range(0, 10)] int ratingScore = 0)
         {
-            await _dishService.SetRating(id, (Guid)HttpContext.Items["UserId"], ratingScore);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            await _dishService.SetRating(id, userId, ratingScore);
             return Ok();
         }
     }

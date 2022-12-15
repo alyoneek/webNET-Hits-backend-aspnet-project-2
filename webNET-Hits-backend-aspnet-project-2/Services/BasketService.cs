@@ -39,7 +39,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public async Task AddDishToCart(Guid userId, Guid dishId)
         {
-            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
+            var dish = await _context.Dishes.FindAsync(dishId);
             if (dish == null)
             {
                 throw new KeyNotFoundException($"Dish with id = {dishId} doesn't exist in database");

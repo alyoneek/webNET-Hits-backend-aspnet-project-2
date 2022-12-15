@@ -81,7 +81,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         public async Task ConfirmOrderDelivery(Guid userId, Guid orderId)
         {
-            var order = await _context.Orders.SingleOrDefaultAsync(o => o.Id == orderId);
+            var order = await _context.Orders.FindAsync(orderId);
 
             if (order == null)
             {

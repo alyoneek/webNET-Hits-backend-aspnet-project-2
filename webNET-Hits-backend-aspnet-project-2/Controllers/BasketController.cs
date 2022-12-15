@@ -24,7 +24,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DishBasketDto>>> Get()
         {
-            var response = await _basketService.GetUserCartInfo((Guid)HttpContext.Items["UserId"]);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            var response = await _basketService.GetUserCartInfo(userId);
             return Ok(response);
         }
 
@@ -41,7 +42,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpDelete("dish/{dishId:Guid}")]
         public async Task<ActionResult> Delete([FromRoute] Guid dishId, [FromQuery] bool? increase)
         {
-            await _basketService.DeleteDishFromCart((Guid)HttpContext.Items["UserId"], dishId, increase);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            await _basketService.DeleteDishFromCart(userId, dishId, increase);
             return Ok();
         }
     }

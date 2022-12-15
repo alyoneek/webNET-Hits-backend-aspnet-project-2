@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Options;
 using webNET_Hits_backend_aspnet_project_2.Exceptions;
 using webNET_Hits_backend_aspnet_project_2.Helpers;
 using webNET_Hits_backend_aspnet_project_2.Models;
@@ -22,12 +24,15 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         private readonly DataBaseContext _context;
         private readonly IDistributedCache _cache;
         private readonly IJwtUtils _jwtUtils;
+        private readonly IOptions<JwtConfigurations> _authOptions;
         private readonly IMapper _mapper;
-        public UserService(DataBaseContext context, IDistributedCache cache, IJwtUtils jwtUtils, IMapper mapper)
+        public UserService(DataBaseContext context, IDistributedCache cache, IJwtUtils jwtUtils, 
+            IOptions<JwtConfigurations> authOptions, IMapper mapper)
         {
             _context = context;
             _cache = cache;
             _jwtUtils = jwtUtils;
+            _authOptions = authOptions;
             _mapper = mapper;
         }
 
@@ -37,7 +42,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (existingUser != null)
             {
-                throw new DublicateValueException($"Email {model.Email} is already taken"); //400
+                throw new DublicateValueException($"Email {model.Email} is already taken"); 
             }
 
             var registerUser = _mapper.Map<User>(model);
@@ -76,30 +81,18 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         {
             await _cache.SetStringAsync(token, " ", new DistributedCacheEntryOptions
             {
-                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(60)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(_authOptions.Value.Lifetime)
             });
         }
         public async Task<UserDto> GetUserProfile(Guid userId)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                //throw new KeyNotFoundException($"User with id = {userId} doesn't exist in database");   ?
-            }
-
+            var user = await _context.Users.FindAsync(userId);
             var userDto = _mapper.Map<UserDto>(user);
             return userDto;
         }
         public async Task EditUserProfile(UserEditModel model, Guid userId)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                //throw new KeyNotFoundException($"User with id = {userId} doesn't exist in database"); ?
-            }
-
+            var user = await _context.Users.FindAsync(userId);
             var newUser = _mapper.Map(model, user);
 
             _context.Users.Update(newUser);

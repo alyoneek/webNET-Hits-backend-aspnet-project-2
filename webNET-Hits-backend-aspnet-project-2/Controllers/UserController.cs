@@ -59,7 +59,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet("profile")]
         public async Task<ActionResult<UserDto>> Get()
         {
-            var response = await _userService.GetUserProfile((Guid)HttpContext.Items["UserId"]);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            var response = await _userService.GetUserProfile(userId);
             return Ok(response);
         }
 
@@ -72,7 +73,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
                 return BadRequest(ModelState);
             }
 
-            await _userService.EditUserProfile(model, (Guid)HttpContext.Items["UserId"]);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            await _userService.EditUserProfile(model, userId);
             return Ok();
         }
     }

@@ -14,7 +14,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 {
     public interface IDishService
     {
-        //Task<Dish> AddDish(DishDto model);
         Task<DishPagedListDto> GetListDishes(FilterQueryParams queryParams);
         Task<DishDto> GetConcreteDish(Guid dishId);
         Task<bool> CheckAbilityToSetRating(Guid dishId, Guid userId);
@@ -29,14 +28,6 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             _context = context;
             _mapper = mapper;
         }
-
-        //public async Task<Dish> AddDish(DishDto model)
-        //{
-        //    var dish = _mapper.Map<Dish>(model);
-        //    var addedDish = await _dishRepository.Add(dish);
-
-        //    return addedDish;
-        //}
         public async Task<DishPagedListDto> GetListDishes(FilterQueryParams queryParams)
         {
             var dishes =  _context.Dishes.AsQueryable();
@@ -47,7 +38,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         }
         public async Task<DishDto> GetConcreteDish(Guid dishId)
         {
-            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
+            var dish = await _context.Dishes.FindAsync(dishId);
 
             if (dish == null)
             {
@@ -59,7 +50,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         }
         public async Task<bool> CheckAbilityToSetRating(Guid dishId, Guid userId)
         {
-            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
+            var dish = await _context.Dishes.FindAsync(dishId);
 
             if (dish == null)
             {
@@ -69,9 +60,9 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
             var dishDelivery = await _context.Orders
                 .Include(o => o.Dishes)
                 .Where(o => o.UserId == userId && o.Status == OrderStatus.Delivered && o.Dishes.Any(d => d.DishId == dishId))
-                .ToListAsync();
+                .FirstOrDefaultAsync();
 
-            if (dishDelivery.Count == 0)
+            if (dishDelivery == null)
             {
                 return false;
             }
@@ -80,7 +71,10 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
         }
         public async Task SetRating(Guid dishId, Guid userId, int ratingScore)
         {
-            var dish = await _context.Dishes.SingleOrDefaultAsync(d => d.Id == dishId);
+            var dish = await _context.Dishes
+                .Include(d => d.Ratings)
+                .Where(d => d.Id == dishId)
+                .SingleOrDefaultAsync();
 
             if (dish == null)
             {
@@ -89,7 +83,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
             if (! await CheckAbilityToSetRating(dishId, userId))
             {
-                throw new InvalidOperationException("User can't set rating on dish that wasn't ordered");   //400
+                throw new InvalidOperationException("User can't set rating on dish that wasn't ordered");  
             }
 
             var existingRating = await _context.Ratings.SingleOrDefaultAsync(r => r.UserId == userId && r.DishId == dishId);
@@ -117,11 +111,11 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 dishes = dishes.Where(d => d.Vegetarian);
             }
 
-            PageInfoModel pagination = new PageInfoModel(await dishes.CountAsync(), queryParams.Page);  //todo
+            PageInfoModel pagination = new PageInfoModel(await dishes.CountAsync(), queryParams.Page); 
 
             if (queryParams.Page > pagination.Count)
             {
-                throw new ArgumentOutOfRangeException(null, "Invalid value for attribute page");    //400
+                throw new ArgumentOutOfRangeException(null, "Invalid value for attribute page");    
             }
 
             dishes = queryParams.Sorting switch
@@ -130,8 +124,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
                 DishSorting.NameDesc => dishes.OrderByDescending(d => d.Name),
                 DishSorting.PriceAsc => dishes.OrderBy(d => d.Price),
                 DishSorting.PriceDesc => dishes.OrderByDescending(d => d.Price),
-                DishSorting.RatingAsc => dishes.OrderBy(d => d.Rating),
-                DishSorting.RatingDesc => dishes.OrderByDescending(d => d.Rating),
+                DishSorting.RatingAsc => dishes.OrderBy(d => d.Rating.HasValue).ThenBy(d => d.Rating),
+                DishSorting.RatingDesc => dishes.OrderByDescending(d => d.Rating.HasValue).ThenByDescending(d => d.Rating),
                 _ => dishes.OrderBy(d => d.Name),
             };
 
@@ -141,7 +135,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Services
 
         private async Task CalculateTotalDishRating(Dish dish)
         {
-            dish.Rating = dish.Ratings.ToList().Sum(r => r.RatingScore) / dish.Ratings.ToList().Count;
+            dish.Rating = dish.Ratings.ToList().Sum(r => r.RatingScore) / (double) dish.Ratings.ToList().Count;
             await _context.SaveChangesAsync();
         }
     }

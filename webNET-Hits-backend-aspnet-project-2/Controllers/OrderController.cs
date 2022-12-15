@@ -22,7 +22,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpGet("{id:Guid}")]
         public async Task<ActionResult<OrderDto>> Get([FromRoute] Guid id)
         {
-            var response = await _orderService.GetConcreteOrder((Guid)HttpContext.Items["UserId"], id);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            var response = await _orderService.GetConcreteOrder(userId, id);
             return Ok(response);
         }
 
@@ -53,7 +54,8 @@ namespace webNET_Hits_backend_aspnet_project_2.Controllers
         [HttpPost("{id:Guid}/status")]
         public async Task<ActionResult> Post([FromRoute] Guid id)
         {
-            await _orderService.ConfirmOrderDelivery((Guid)HttpContext.Items["UserId"], id);
+            var userId = (Guid)HttpContext.Items["UserId"];
+            await _orderService.ConfirmOrderDelivery(userId, id);
             return Ok();
         }
     }
