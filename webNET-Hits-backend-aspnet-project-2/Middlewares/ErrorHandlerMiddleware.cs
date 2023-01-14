@@ -16,12 +16,12 @@ namespace webNET_Hits_backend_aspnet_project_2.Middlewares
     {
         private readonly ApiBehaviorOptions _options;
         private readonly RequestDelegate _next;
-        //private readonly ILoggerManager _logger;
-        public ErrorHandlerMiddleware(IOptions<ApiBehaviorOptions> options, RequestDelegate next) //ILoggerManager logger)
+        private readonly ILogger<ErrorHandlerMiddleware> _logger;
+        public ErrorHandlerMiddleware(IOptions<ApiBehaviorOptions> options, RequestDelegate next, ILogger<ErrorHandlerMiddleware> logger)
         {
             _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
             _next = next;
-            //_logger = logger;
+            _logger = logger;
         }
         public async Task InvokeAsync(HttpContext httpContext)
         {
@@ -31,7 +31,7 @@ namespace webNET_Hits_backend_aspnet_project_2.Middlewares
             }
             catch (KeyNotFoundException ex)
             {
-                //_logger.LogError($"Something went wrong: {ex}");
+                _logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.NotFound);
             }
             catch (Exception ex) when (ex is ArgumentOutOfRangeException ||
@@ -39,17 +39,17 @@ namespace webNET_Hits_backend_aspnet_project_2.Middlewares
                               ex is DublicateValueException ||
                               ex is FailedAuthorizationException)
             {
-                //_logger.LogError($"Something went wrong: {ex}");
+                _logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
             }
             catch (MismatchedValuesException ex)
             {
-                //_logger.LogError($"Something went wrong: {ex}");
+                _logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.Forbidden);
             }
             catch (Exception ex)
             {
-                //_logger.LogError($"Something went wrong: {ex}");
+                _logger.LogError($"Something went wrong: {ex}");
                 await HandleExceptionAsync(httpContext, ex, HttpStatusCode.InternalServerError);
             }
         }
